@@ -41,15 +41,22 @@ export const TextSequenceItem: React.FC<{ item: TextElement; options: SequenceIt
         )));
     };
 
+    // TODO: Extract this logic to be reusable for other draggable items
     const handleMouseDown = (e: React.MouseEvent) => {
         e.preventDefault();
-        const startX = e.clientX - item.x;
-        const startY = e.clientY - item.y;
+        const startX = e.clientX;
+        const startY = e.clientY;
+
+        // TODO: This needs a more reliable way to get the scaled container
+        const container = document.querySelector('.__remotion-player') as HTMLElement; 
+        const rect = container.getBoundingClientRect();
+        const scaleX = rect.width / container.offsetWidth;
+        const scaleY = rect.height / container.offsetHeight;
 
         const handleMouseMove = (e: MouseEvent) => {
-            const newX = e.clientX - startX;
-            const newY = e.clientY - startY;
-            onUpdateText(item.id, { x: newX, y: newY});
+            const diffX = e.clientX - startX;
+            const diffY = e.clientY - startY;
+            onUpdateText(item.id, { x: item.x + diffX / scaleX, y: item.y + diffY / scaleY});
             
             // handleTextChange fonksiyonu varsa pozisyon güncellemesini bildir
             if (handleTextChange) {
