@@ -35,7 +35,9 @@
       "artifactName": "Editor-AI-Setup.exe"
     },
     "compression": "normal",
-    "electronLanguages": ["en-US"]
+    "electronLanguages": [
+      "en-US"
+    ]
   },
   "dependencies": {
     "@ffmpeg/ffmpeg": "*",
@@ -58,6 +60,7 @@
     "moveable": "^0.53.0",
     "next": "^14.2.30",
     "next-themes": "^0.4.6",
+    "openai": "^6.7.0",
     "postcss": "8.4.31",
     "react": "18.2.0",
     "react-dom": "18.2.0",
