@@ -80,7 +80,7 @@ export interface ExportConfig {
     includeSubtitles: boolean; // TODO: add this as an option
 }
 
-export type ActiveElement = 'media' | 'text' | 'export';
+export type ActiveElement = 'media' | 'text' | 'export' | 'ai';
 
 
 export interface ProjectState {

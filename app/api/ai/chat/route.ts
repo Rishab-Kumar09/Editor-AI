@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
-import { appSettings } from '../../settings/route';
+import { appSettings } from '@/app/lib/settings';
 
 // Enhanced system prompt for VIDEO EDITING with ACTION COMMANDS
 const SYSTEM_PROMPT = `You are an AI video editing assistant for Editor AI. You help users edit their videos using natural language commands.

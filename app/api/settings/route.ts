@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-// Shared settings storage (will use electron-store in production)
-export const appSettings = {
-  apiKey: ''
-};
+import { appSettings } from '@/app/lib/settings';
 
 export async function GET() {
   try {

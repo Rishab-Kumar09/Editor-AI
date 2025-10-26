@@ -82,7 +82,7 @@ export default function Project({ params }: { params: { id: string } }) {
     }, [projectState, dispatch]);
 
 
-    const handleFocus = (section: "media" | "text" | "export") => {
+    const handleFocus = (section: "media" | "text" | "export" | "ai") => {
         dispatch(setActiveSection(section));
     };
 
