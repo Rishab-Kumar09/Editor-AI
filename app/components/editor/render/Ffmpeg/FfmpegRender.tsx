@@ -277,7 +277,6 @@ export default function FfmpegRender({ loadFunction, loadFfmpeg, ffmpeg, logMess
                             <div>
                                 <div className="bg-black p-2 h-40 text-sm font-mono rounded">
                                     <div>{logMessages}</div>
-                                    <p className="text-xs text-gray-400 italic">The progress bar is experimental in FFmpeg WASM, so it might appear slow or unresponsive even though the actual processing is not.</p>
                                     <FfmpegProgressBar ffmpeg={ffmpeg} />
                                 </div>
                             </div>
@@ -286,7 +285,7 @@ export default function FfmpegRender({ loadFunction, loadFfmpeg, ffmpeg, logMess
                                 {previewUrl && (
                                     <video src={previewUrl} controls className="w-full mb-4" />
                                 )}
-                                <div className="flex justify-between">
+                                <div className="flex justify-center">
                                     <a
                                         href={previewUrl || '#'}
                                         download={`${projectName}.mp4`}
@@ -300,15 +299,6 @@ export default function FfmpegRender({ loadFunction, loadFfmpeg, ffmpeg, logMess
                                             width={18}
                                         />
                                         <span className="ml-2">Save Video</span>
-                                    </a>
-                                    <a
-                                        href="https://github.com/sponsors/mohyware"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className={`inline-flex items-center p-3 bg-pink-600 hover:bg-pink-500 rounded-lg text-gray-900 font-bold transition-all transform`}
-                                    >
-                                        <Heart size={20} className="mr-2" />
-                                        Sponsor on Github
                                     </a>
                                 </div>
                             </div>

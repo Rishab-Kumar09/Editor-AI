@@ -24,57 +24,40 @@ export const extractConfigs = (config: ExportConfig) => {
             scale = "scale=1920:1080";
     }
 
-    // Quality settings
+    // Quality settings - OPTIMIZED FOR SPEED!
+    // FFmpeg WASM is slow, so we prioritize speed over quality
     let crf;
     let videoBitrate;
     let audioBitrate;
+    let preset;
+    
     switch (config.quality) {
-        case "low":
+        case "medium":
+            // Fastest possible - for quick previews
             crf = 28;
+            preset = "ultrafast";
             videoBitrate = "2M";
             audioBitrate = "128k";
             break;
-        case "medium":
+        case "high":
+            // Fast with good quality (RECOMMENDED)
             crf = 23;
+            preset = "ultrafast";
             videoBitrate = "4M";
             audioBitrate = "192k";
             break;
-        case "high":
+        case "ultra":
+            // Best quality, slower (for final export)
             crf = 18;
+            preset = "veryfast";
             videoBitrate = "8M";
             audioBitrate = "256k";
             break;
-        case "ultra":
-            crf = 14;
-            videoBitrate = "16M";
-            audioBitrate = "320k";
-            break;
         default:
             crf = 23;
+            preset = "ultrafast";
             videoBitrate = "4M";
             audioBitrate = "192k";
-    }
-
-    // Encoding speed
-    let preset;
-    switch (config.speed) {
-        case "fastest":
-            preset = "ultrafast";
-            break;
-        case "fast":
-            preset = "veryfast";
-            break;
-        case "balanced":
-            preset = "medium";
-            break;
-        case "slow":
-            preset = "slow";
-            break;
-        case "slowest":
-            preset = "veryslow";
-            break;
-        default:
-            preset = "medium";
     }
 
     return {

@@ -2,11 +2,40 @@
   "name": "clipjs",
   "version": "0.1.0",
   "private": true,
+  "main": "electron/main.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postbuild": "node scripts/post-build.js",
+    "electron:dev": "concurrently \"cross-env NODE_ENV=development npm run dev\" \"wait-on http://localhost:3000 && cross-env NODE_ENV=development electron .\"",
+    "electron:build": "next build && node scripts/post-build.js && electron-builder",
+    "build:win": "next build && node scripts/post-build.js && electron-builder --win"
+  },
+  "build": {
+    "appId": "com.editorai.app",
+    "productName": "Editor AI",
+    "asar": false,
+    "files": [
+      "electron/**/*",
+      ".next/standalone/**/*",
+      ".next/static/**/*",
+      "public/**/*",
+      "!**/*.{map,md}",
+      "!node_modules"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "public/favicon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "Editor-AI-Setup.exe"
+    },
+    "compression": "normal",
+    "electronLanguages": ["en-US"]
   },
   "dependencies": {
     "@ffmpeg/ffmpeg": "*",
@@ -41,6 +70,11 @@
     "uuid": "^11.1.0"
   },
   "devDependencies": {
-    "@types/lodash": "^4.17.16"
+    "@types/lodash": "^4.17.16",
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
+    "electron": "^38.4.0",
+    "electron-builder": "^26.0.12",
+    "wait-on": "^9.0.1"
   }
 }

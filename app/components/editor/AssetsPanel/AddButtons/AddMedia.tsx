@@ -23,15 +23,44 @@ export default function AddMedia({ fileId }: { fileId: string }) {
                 ? Math.max(...relevantClips.map(f => f.positionEnd))
                 : 0;
 
+            const fileType = categorizeFile(file.type);
+            const src = URL.createObjectURL(file);
+            
+            // Get actual duration for video/audio files
+            let actualDuration = 30; // default for images
+            
+            if (fileType === 'video' || fileType === 'audio') {
+                try {
+                    actualDuration = await new Promise<number>((resolve) => {
+                        const media = document.createElement(fileType) as HTMLVideoElement | HTMLAudioElement;
+                        media.preload = 'metadata';
+                        media.onloadedmetadata = () => {
+                            // Don't revoke the URL - it's still needed for playback
+                            resolve(media.duration || 30);
+                            media.remove(); // Clean up the temp element
+                        };
+                        media.onerror = () => {
+                            console.error('Error loading media metadata');
+                            resolve(30); // fallback
+                            media.remove(); // Clean up the temp element
+                        };
+                        media.src = src;
+                    });
+                } catch (error) {
+                    console.error('Error getting media duration:', error);
+                    actualDuration = 30;
+                }
+            }
+
             updatedMedia.push({
                 id: mediaId,
                 fileName: file.name,
                 fileId: fileId,
                 startTime: 0,
-                endTime: 30,
-                src: URL.createObjectURL(file),
+                endTime: actualDuration,
+                src: src,
                 positionStart: lastEnd,
-                positionEnd: lastEnd + 30,
+                positionEnd: lastEnd + actualDuration,
                 includeInMerge: true,
                 x: 0,
                 y: 0,
@@ -42,7 +71,7 @@ export default function AddMedia({ fileId }: { fileId: string }) {
                 crop: { x: 0, y: 0, width: 1920, height: 1080 },
                 playbackSpeed: 1,
                 volume: 100,
-                type: categorizeFile(file.type),
+                type: fileType,
                 zIndex: 0,
             });
         }

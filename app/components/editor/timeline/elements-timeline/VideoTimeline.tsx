@@ -116,6 +116,7 @@ export default function VideoTimeline() {
                                 src="https://www.svgrepo.com/show/532727/video.svg"
                             />
                             <span className="truncate text-x">{clip.fileName}</span>
+                            <span className="ml-2 text-xs text-gray-400">({(clip.endTime - clip.startTime).toFixed(1)}s)</span>
 
                         </div>
                         <Moveable

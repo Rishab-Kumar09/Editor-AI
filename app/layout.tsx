@@ -5,7 +5,6 @@ import { Providers } from './providers'
 import Header from "./components/header/Header";
 import Footer from "./components/footer/Footer";
 import { Toaster } from 'react-hot-toast';
-import { Analytics } from "@vercel/analytics/next"
 
 const geistSans = Inter({
   variable: "--font-geist-sans",
@@ -18,8 +17,8 @@ const geistMono = Roboto_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'ClipJS',
-  description: 'A free online video editor that enables you to edit videos directly from your web browser.',
+  title: 'Editor AI',
+  description: 'An AI-powered video editor that enables you to edit videos with artificial intelligence.',
 }
 
 export default function RootLayout({
@@ -45,7 +44,6 @@ export default function RootLayout({
               }}
             />
             {children}
-            <Analytics />
           </main>
           <Footer />
         </Providers>
