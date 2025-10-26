@@ -2,29 +2,75 @@ import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { appSettings } from '../../settings/route';
 
-// System prompt for the AI video editor
+// Enhanced system prompt for VIDEO EDITING with ACTION COMMANDS
 const SYSTEM_PROMPT = `You are an AI video editing assistant for Editor AI. You help users edit their videos using natural language commands.
 
-Your capabilities:
-- Add, remove, and rearrange clips on the timeline
-- Apply transitions, effects, and filters
-- Adjust timing, speed, and duration of clips
-- Add text overlays and captions
-- Control video properties (brightness, contrast, etc.)
-- Export videos with specific settings
+Your job is to:
+1. Understand what the user wants to do with their video
+2. Respond in a friendly, helpful way
+3. Output JSON actions that the timeline can execute
 
-When users give commands, respond in a friendly, helpful way and explain what you're doing. If a command requires multiple steps or clarification, ask for it.
+AVAILABLE ACTIONS:
+- add_all_media: Add all media from library to timeline
+- add_media: Add specific media file (by index or name)
+- clear_timeline: Remove all clips from timeline
+- add_transition: Add transition between clips
+- speed_up: Speed up a clip
+- slow_down: Slow down a clip
+- add_text: Add text overlay
 
-For now, you can describe what you would do. Timeline manipulation will be added soon.
+RESPONSE FORMAT:
+Always respond with:
+{
+  "message": "Your friendly response to the user",
+  "actions": [
+    { "type": "action_type", "params": {...} }
+  ]
+}
 
-Example interactions:
+EXAMPLES:
+
 User: "Add all my videos to the timeline"
-You: "I'll add all the videos from your media library to the timeline in sequence. This will create a continuous video from all your clips."
+Response:
+{
+  "message": "I'll add all your media files to the timeline in sequence!",
+  "actions": [
+    { "type": "add_all_media", "params": {} }
+  ]
+}
 
-User: "Make the second clip faster"
-You: "I'll speed up the second clip on your timeline. What speed would you like? 1.5x, 2x, or something else?"
+User: "Clear the timeline"
+Response:
+{
+  "message": "Timeline cleared! Ready for a fresh start.",
+  "actions": [
+    { "type": "clear_timeline", "params": {} }
+  ]
+}
 
-Keep responses concise and actionable.`;
+User: "Make the second clip 2x faster"
+Response:
+{
+  "message": "Speeding up the second clip to 2x speed!",
+  "actions": [
+    { "type": "speed_up", "params": { "clipIndex": 1, "speed": 2 } }
+  ]
+}
+
+User: "Add a fade transition between clips"
+Response:
+{
+  "message": "Adding fade transitions between all clips!",
+  "actions": [
+    { "type": "add_transition", "params": { "transitionType": "fade" } }
+  ]
+}
+
+IMPORTANT:
+- Always include both "message" and "actions" in your response
+- If unsure, ask for clarification but still provide a helpful message
+- Keep responses friendly and conversational
+- Output valid JSON only`;
 
 export async function POST(request: NextRequest) {
   try {
@@ -50,25 +96,36 @@ export async function POST(request: NextRequest) {
     // Initialize OpenAI
     const openai = new OpenAI({ apiKey });
 
-    // Call GPT-4o
+    // Call GPT-4o with JSON mode
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         ...messages
       ],
+      response_format: { type: 'json_object' },
       temperature: 0.7,
-      max_tokens: 500
+      max_tokens: 800
     });
 
-    const assistantMessage = completion.choices[0]?.message?.content || 'I apologize, I could not process that request.';
+    const responseText = completion.choices[0]?.message?.content || '{"message": "I apologize, I could not process that request.", "actions": []}';
+    
+    // Parse the JSON response
+    let parsedResponse;
+    try {
+      parsedResponse = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('Failed to parse GPT response:', responseText);
+      parsedResponse = {
+        message: responseText,
+        actions: []
+      };
+    }
 
-    // TODO: Parse assistant message for timeline actions
-    // For now, just return the message
     return NextResponse.json({
       success: true,
-      message: assistantMessage,
-      actions: [] // Will be populated later with parsed timeline actions
+      message: parsedResponse.message || 'Done!',
+      actions: parsedResponse.actions || []
     });
 
   } catch (error: any) {
@@ -95,4 +152,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

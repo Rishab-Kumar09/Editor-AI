@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Sparkles, Loader2 } from 'lucide-react';
+import { useAppDispatch, useAppSelector } from '@/app/store';
+import { executeTimelineActions } from '@/app/lib/ai/timelineActions';
 
 interface Message {
   id: string;
@@ -11,11 +13,14 @@ interface Message {
 }
 
 export default function AIChatPanel() {
+  const dispatch = useAppDispatch();
+  const { mediaFiles } = useAppSelector(state => state.projectState);
+  
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '0',
       role: 'assistant',
-      content: "👋 Hi! I'm your AI video editing assistant. I can help you edit your video using natural language commands.\n\nTry saying:\n• \"Add all my videos to the timeline\"\n• \"Add a fade transition between clips\"\n• \"Speed up the second clip by 2x\"",
+      content: "👋 Hi! I'm your AI video editing assistant. I can help you edit your video using natural language commands.\n\nTry saying:\n• \"Add all my videos to the timeline\"\n• \"Clear the timeline\"\n• \"Make the video twice as fast\"",
       timestamp: new Date()
     }
   ]);
@@ -93,10 +98,22 @@ export default function AIChatPanel() {
 
       setMessages(prev => [...prev, assistantMessage]);
 
-      // If AI returns actions, execute them
+      // If AI returns actions, execute them on the timeline
       if (data.actions && data.actions.length > 0) {
-        console.log('Executing AI actions:', data.actions);
-        // TODO: Execute timeline actions
+        console.log('✨ Executing AI actions:', data.actions);
+        try {
+          await executeTimelineActions(data.actions, dispatch, mediaFiles);
+          console.log('✅ Actions executed successfully!');
+        } catch (actionError) {
+          console.error('Failed to execute actions:', actionError);
+          const errorMsg: Message = {
+            id: (Date.now() + 2).toString(),
+            role: 'assistant',
+            content: '⚠️ I understood your request but had trouble applying it to the timeline. Please try again.',
+            timestamp: new Date()
+          };
+          setMessages(prev => [...prev, errorMsg]);
+        }
       }
     } catch (error) {
       console.error('AI chat error:', error);
