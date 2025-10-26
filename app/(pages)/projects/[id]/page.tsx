@@ -14,6 +14,8 @@ import LibraryButton from "@/app/components/editor/AssetsPanel/SidebarButtons/Li
 import ExportButton from "@/app/components/editor/AssetsPanel/SidebarButtons/ExportButton";
 import HomeButton from "@/app/components/editor/AssetsPanel/SidebarButtons/HomeButton";
 import ShortcutsButton from "@/app/components/editor/AssetsPanel/SidebarButtons/ShortcutsButton";
+import AIButton from "@/app/components/editor/AssetsPanel/SidebarButtons/AIButton";
+import AIChatPanel from "@/app/components/editor/AIChat/AIChatPanel";
 import MediaProperties from "../../../components/editor/PropertiesSection/MediaProperties";
 import TextProperties from "../../../components/editor/PropertiesSection/TextProperties";
 import { Timeline } from "../../../components/editor/timeline/Timline";
@@ -102,6 +104,7 @@ export default function Project({ params }: { params: { id: string } }) {
                 <div className="flex-[0.1] min-w-[60px] max-w-[100px] border-r border-gray-700 overflow-y-auto p-4">
                     <div className="flex flex-col space-y-2">
                         <HomeButton />
+                        <AIButton onClick={() => handleFocus("ai")} />
                         <TextButton onClick={() => handleFocus("text")} />
                         <LibraryButton onClick={() => handleFocus("media")} />
                         <ExportButton onClick={() => handleFocus("export")} />
@@ -111,9 +114,12 @@ export default function Project({ params }: { params: { id: string } }) {
                 </div>
 
                 {/* Add media and text */}
-                <div className="flex-[0.3] min-w-[200px] border-r border-gray-800 overflow-y-auto p-4">
+                <div className="flex-[0.3] min-w-[200px] max-w-[400px] border-r border-gray-800 overflow-hidden flex flex-col">
+                    {activeSection === "ai" && (
+                        <AIChatPanel />
+                    )}
                     {activeSection === "media" && (
-                        <div>
+                        <div className="overflow-y-auto p-4">
                             <h2 className="text-lg flex flex-row gap-2 items-center justify-center font-semibold mb-2">
                                 <AddMedia />
                             </h2>
@@ -121,12 +127,12 @@ export default function Project({ params }: { params: { id: string } }) {
                         </div>
                     )}
                     {activeSection === "text" && (
-                        <div>
+                        <div className="overflow-y-auto p-4">
                             <AddText />
                         </div>
                     )}
                     {activeSection === "export" && (
-                        <div>
+                        <div className="overflow-y-auto p-4">
                             <h2 className="text-lg font-semibold mb-4">Export</h2>
                             <ExportList />
                         </div>

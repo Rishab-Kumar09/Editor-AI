@@ -1,20 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// In-memory storage for MVP (will use localStorage/electron-store in production)
-let settings = {
+// Shared settings storage (will use electron-store in production)
+export const appSettings = {
   apiKey: ''
 };
 
 export async function GET() {
   try {
     // Return masked API key for security
-    const maskedKey = settings.apiKey 
-      ? settings.apiKey.slice(0, 7) + '...' + settings.apiKey.slice(-4)
+    const maskedKey = appSettings.apiKey 
+      ? appSettings.apiKey.slice(0, 7) + '...' + appSettings.apiKey.slice(-4)
       : '';
     
     return NextResponse.json({
       apiKey: maskedKey,
-      hasKey: !!settings.apiKey
+      hasKey: !!appSettings.apiKey
     });
   } catch (error) {
     console.error('GET /api/settings error:', error);
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Store the API key (encrypted in production)
-    settings.apiKey = apiKey;
+    appSettings.apiKey = apiKey;
 
     return NextResponse.json({
       success: true,
