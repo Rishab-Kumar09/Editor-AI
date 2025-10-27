@@ -190,22 +190,18 @@ export default function AIChatPanel() {
         return;
       }
 
-      // Generate captions from transcript
-      const response = await fetch('/api/ai/captions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          words: transcript.words,
-          maxWordsPerLine: 3,
-          styleId: params.styleId || selectedCaptionStyle,
-        }),
-      });
+      // Get caption style
+      const { captionStyles } = await import('@/app/lib/ai/captionStyles');
+      const style = captionStyles[params.styleId || selectedCaptionStyle || 'mrbeast'] || captionStyles.mrbeast;
 
-      if (!response.ok) {
-        throw new Error('Caption generation failed');
+      // Use segments from transcript (words might be null with current Whisper API)
+      const segments = transcript.segments || [];
+      
+      if (!segments || segments.length === 0) {
+        throw new Error('No transcript segments available. Please transcribe the video first.');
       }
 
-      const { segments, style } = await response.json();
+      console.log('📝 Creating captions from', segments.length, 'segments');
 
       // Actually add captions to the timeline!
       const captionElements = segments.map((seg: any, index: number) => ({
