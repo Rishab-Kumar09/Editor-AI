@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { TextElement, MediaFile, ActiveElement, ExportConfig } from '../../types';
+import { TextElement, MediaFile, ActiveElement, ExportConfig, TranscriptData } from '../../types';
 import { ProjectState } from '../../types';
 
 export const initialState: ProjectState = {
@@ -9,6 +9,7 @@ export const initialState: ProjectState = {
     lastModified: new Date().toISOString(),
     mediaFiles: [],
     textElements: [],
+    transcript: null, // Persistent transcript storage
     currentTime: 0,
     isPlaying: false,
     isMuted: false,
@@ -111,6 +112,9 @@ const projectStateSlice = createSlice({
         setMarkerTrack: (state, action: PayloadAction<boolean>) => {
             state.enableMarkerTracking = action.payload;
         },
+        setTranscript: (state, action: PayloadAction<TranscriptData | null>) => {
+            state.transcript = action.payload;
+        },
         // Special reducer for rehydrating state from IndexedDB
         rehydrate: (state, action: PayloadAction<ProjectState>) => {
             return { ...state, ...action.payload };
@@ -139,6 +143,7 @@ export const {
     setActiveElement,
     setActiveElementIndex,
     setTimelineZoom,
+    setTranscript,
     rehydrate,
     createNewProject,
 } = projectStateSlice.actions;

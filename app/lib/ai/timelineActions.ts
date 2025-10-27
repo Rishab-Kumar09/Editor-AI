@@ -401,6 +401,12 @@ async function handleSearchAndAddImages(
           playbackSpeed: 1,
           volume: 1,
           zIndex: 10 + i, // Higher zIndex so images appear on top of video
+          // Position and size for proper display
+          x: 0, // Center horizontally
+          y: 0, // Center vertically  
+          width: 1920, // Full HD width (will scale down)
+          height: 1080, // Full HD height (will scale down)
+          opacity: 100, // Fully visible
         };
 
         newMediaFiles.push(mediaFile);

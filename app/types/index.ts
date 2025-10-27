@@ -83,11 +83,28 @@ export interface ExportConfig {
 export type ActiveElement = 'media' | 'text' | 'export' | 'ai';
 
 
+export interface TranscriptData {
+    text: string;
+    segments?: Array<{
+        text: string;
+        start: number;
+        end: number;
+    }>;
+    words?: Array<{
+        word: string;
+        start: number;
+        end: number;
+    }>;
+    language?: string;
+    clipId?: string; // Which clip this transcript belongs to
+}
+
 export interface ProjectState {
     id: string;
     mediaFiles: MediaFile[];
     textElements: TextElement[];
     filesID?: string[],
+    transcript?: TranscriptData | null; // Save transcripts with the project
     currentTime: number;
     isPlaying: boolean;
     isMuted: boolean;

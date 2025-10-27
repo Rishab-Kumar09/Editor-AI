@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Sparkles, Loader2 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/app/store';
+import { setTranscript as saveTranscript } from '@/app/store/slices/projectSlice';
 import { executeTimelineActions } from '@/app/lib/ai/timelineActions';
 import TranscriptPanel from '@/app/components/editor/Transcript/TranscriptPanel';
 import CaptionStylePicker from '@/app/components/editor/Transcript/CaptionStylePicker';
@@ -17,7 +18,7 @@ interface Message {
 
 export default function AIChatPanel() {
   const dispatch = useAppDispatch();
-  const { mediaFiles, textElements } = useAppSelector(state => state.projectState);
+  const { mediaFiles, textElements, transcript } = useAppSelector(state => state.projectState);
   
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -30,7 +31,6 @@ export default function AIChatPanel() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [apiKeyStatus, setApiKeyStatus] = useState<'checking' | 'valid' | 'missing'>('checking');
-  const [transcript, setTranscript] = useState<any>(null);
   const [showTranscript, setShowTranscript] = useState(false);
   const [showCaptionPicker, setShowCaptionPicker] = useState(false);
   const [selectedCaptionStyle, setSelectedCaptionStyle] = useState('mrbeast');
@@ -43,6 +43,13 @@ export default function AIChatPanel() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Show transcript panel if transcript exists
+  useEffect(() => {
+    if (transcript) {
+      setShowTranscript(true);
+    }
+  }, [transcript]);
 
   const checkAPIKey = async () => {
     try {
@@ -63,11 +70,24 @@ export default function AIChatPanel() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleTranscribeVideo = async (params: { clipIndex: number }) => {
+  const handleTranscribeVideo = async (params: { clipIndex: number; forceRetranscribe?: boolean }) => {
     try {
       const targetClip = mediaFiles[params.clipIndex];
       if (!targetClip) {
         throw new Error('Clip not found');
+      }
+
+      // Check if transcript already exists and matches this clip
+      if (transcript && transcript.clipId === targetClip.id && !params.forceRetranscribe) {
+        const msg: Message = {
+          id: Date.now().toString(),
+          role: 'assistant',
+          content: '✅ Found existing transcript! Using saved transcript. (Say "transcribe again" if you want to re-transcribe)',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, msg]);
+        setShowTranscript(true);
+        return;
       }
 
       // Get the file data from IndexedDB
@@ -152,13 +172,19 @@ export default function AIChatPanel() {
       }
 
       const transcriptData = await response.json();
-      setTranscript(transcriptData);
+      
+      // Save transcript to Redux with clip ID
+      const savedTranscript = {
+        ...transcriptData,
+        clipId: targetClip.id
+      };
+      dispatch(saveTranscript(savedTranscript));
       setShowTranscript(true);
 
       const successMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: '✅ Transcription complete! You can view, edit, and download it above.',
+        content: '✅ Transcription complete and saved! You can view, edit, and download it above.',
         timestamp: new Date()
       };
       setMessages(prev => [...prev, successMsg]);
@@ -385,7 +411,7 @@ export default function AIChatPanel() {
           <TranscriptPanel
             transcript={transcript}
             onEdit={(newText) => {
-              setTranscript({ ...transcript, text: newText });
+              dispatch(saveTranscript({ ...transcript, text: newText }));
             }}
           />
         </div>

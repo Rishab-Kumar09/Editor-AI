@@ -32,7 +32,9 @@ AVAILABLE ACTIONS:
     * Keep only: {clipIndex, endTrim} - Keep only first X seconds
     * Restore: {clipIndex, restore: true} - Undo trim, restore original length
 - add_captions: Auto-generate captions with Whisper (params: {clipIndex, styleId})
-- transcribe_video: Transcribe video audio with timestamps (params: {clipIndex})
+- transcribe_video: Transcribe video audio with timestamps (params: {clipIndex, forceRetranscribe?: boolean})
+  * Transcripts are saved automatically and reused!
+  * Use forceRetranscribe: true ONLY if user explicitly says "transcribe again" or "re-transcribe"
 - search_and_add_images: 🆕 Search and download images from internet! (params: {query, count, positions?})
 - ask_image_source: Ask if user wants images from uploaded files or internet (params: {context})
 - instruct_manual: Give manual instructions ONLY for features not yet implemented (params: {feature, steps})
