@@ -231,6 +231,9 @@ export default function AIChatPanel() {
 
       const data = await response.json();
 
+      console.log('🤖 AI Response:', data);
+      console.log('📊 Actions received:', data.actions);
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
@@ -242,8 +245,9 @@ export default function AIChatPanel() {
 
       // Execute actions
       if (data.actions && data.actions.length > 0) {
-        console.log('✨ Executing AI actions:', data.actions);
+        console.log('✨ Executing', data.actions.length, 'AI action(s):', data.actions);
         for (const action of data.actions) {
+          console.log('⚡ Executing action:', action.type, 'with params:', action.params);
           if (action.type === 'add_captions') {
             await handleAddCaptions(action.params);
           } else if (action.type === 'transcribe_video') {
@@ -252,7 +256,10 @@ export default function AIChatPanel() {
             await executeTimelineActions([action], dispatch, mediaFiles, textElements);
           }
         }
-        console.log('✅ Actions executed successfully!');
+        console.log('✅ All', data.actions.length, 'action(s) executed successfully!');
+      } else {
+        console.warn('⚠️ NO ACTIONS RETURNED! AI just talked without doing anything.');
+        console.warn('   This is the problem! AI should return actions.');
       }
     } catch (error) {
       console.error('AI chat error:', error);

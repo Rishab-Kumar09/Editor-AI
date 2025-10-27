@@ -92,17 +92,19 @@ async function handleAddAllMedia(dispatch: Dispatch, currentMediaFiles: MediaFil
   let currentPosition = 0;
   const updatedMedia = currentMediaFiles.map((media, index) => {
     const duration = media.endTime - media.startTime;
-    const newMedia = {
+    const newMedia: MediaFile = {
       ...media,
       positionStart: currentPosition,
       positionEnd: currentPosition + duration,
-      trackId: media.type === 'audio' ? 1 : 0 // Audio track 1, Video track 0
+      includeInMerge: true, // Make sure to include in render
     };
     currentPosition += duration;
     return newMedia;
   });
 
+  console.log('✅ ADD_ALL_MEDIA: Adding', updatedMedia.length, 'files to timeline');
   dispatch(setMediaFiles(updatedMedia));
+  console.log('✅ ADD_ALL_MEDIA: Dispatch complete!');
 }
 
 /**
