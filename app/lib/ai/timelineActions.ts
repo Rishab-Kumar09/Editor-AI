@@ -60,6 +60,10 @@ export async function executeTimelineActions(
           console.log('AI triggering transcription:', action.params);
           break;
 
+        case 'search_and_add_images':
+          await handleSearchAndAddImages(dispatch, currentMediaFiles, action.params);
+          break;
+
         case 'ask_image_source':
           // User needs to choose: uploaded images or internet search
           // This will be handled in the chat UI
@@ -308,5 +312,97 @@ async function handleAddCaptions(
   console.log('Adding captions to clip:', params);
   // This will trigger the transcription + caption workflow in the UI
   // The actual implementation will be in the AIChatPanel component
+}
+
+/**
+ * Search for images online and add to timeline
+ */
+async function handleSearchAndAddImages(
+  dispatch: Dispatch,
+  currentMediaFiles: MediaFile[],
+  params: { query: string; count?: number; positions?: number[] }
+) {
+  const { query, count = 5, positions } = params;
+  
+  console.log(`🔍 Searching for ${count} images: "${query}"`);
+
+  try {
+    // Call image search API
+    const response = await fetch('/api/ai/images', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, count }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Image search failed');
+    }
+
+    const data = await response.json();
+    const images = data.images;
+
+    if (!images || images.length === 0) {
+      console.warn('No images found');
+      return;
+    }
+
+    console.log(`✅ Found ${images.length} images, downloading...`);
+
+    // Download each image and add to project
+    const newMediaFiles: MediaFile[] = [];
+    let currentPosition = currentMediaFiles.length > 0 
+      ? Math.max(...currentMediaFiles.map(m => m.positionEnd)) 
+      : 0;
+
+    for (let i = 0; i < images.length; i++) {
+      const image = images[i];
+      try {
+        // Download image as blob
+        const imageResponse = await fetch(image.url);
+        const blob = await imageResponse.blob();
+        const file = new File([blob], `${query}-${i + 1}.jpg`, { type: 'image/jpeg' });
+
+        // Save to IndexedDB
+        const { storeFile } = await import('@/app/store');
+        const fileId = `image-${Date.now()}-${i}`;
+        await storeFile(file, fileId);
+
+        // Create media file entry
+        const imageDuration = 3; // Default 3 seconds per image
+        const position = positions && positions[i] !== undefined ? positions[i] : currentPosition;
+
+        const mediaFile: MediaFile = {
+          id: `media-${Date.now()}-${i}`,
+          fileName: file.name,
+          fileId: fileId,
+          type: 'image',
+          startTime: 0,
+          endTime: imageDuration,
+          positionStart: position,
+          positionEnd: position + imageDuration,
+          includeInMerge: true,
+          playbackSpeed: 1,
+          volume: 1,
+          zIndex: 0,
+        };
+
+        newMediaFiles.push(mediaFile);
+        currentPosition = position + imageDuration;
+
+        console.log(`📥 Downloaded: ${image.alt} (${image.source})`);
+      } catch (error) {
+        console.error(`Failed to download image ${i + 1}:`, error);
+      }
+    }
+
+    // Add all new images to timeline
+    if (newMediaFiles.length > 0) {
+      const updatedMedia = [...currentMediaFiles, ...newMediaFiles];
+      dispatch(setMediaFiles(updatedMedia));
+      console.log(`✨ Added ${newMediaFiles.length} images to timeline!`);
+    }
+  } catch (error) {
+    console.error('Image search error:', error);
+  }
 }
 
