@@ -192,14 +192,23 @@ async function handleAddText(
 }
 
 /**
- * Trim clip to specific duration
+ * Trim clip with advanced options:
+ * - newDuration: Trim to specific duration from start
+ * - startTrim/endTrim: Trim a specific range (e.g., from 20s to 30s)
+ * - restore: Restore original clip length
  */
 async function handleTrimClip(
   dispatch: Dispatch,
   currentMediaFiles: MediaFile[],
-  params: { clipIndex: number; newDuration: number }
+  params: { 
+    clipIndex: number; 
+    newDuration?: number;
+    startTrim?: number;  // Start time to keep (e.g., 20)
+    endTrim?: number;    // End time to keep (e.g., 30)
+    restore?: boolean;   // Restore to original length
+  }
 ) {
-  const { clipIndex, newDuration } = params;
+  const { clipIndex, newDuration, startTrim, endTrim, restore } = params;
   const targetClip = currentMediaFiles[clipIndex];
 
   if (!targetClip) {
@@ -208,11 +217,49 @@ async function handleTrimClip(
   }
 
   const updatedMedia = [...currentMediaFiles];
+  
+  // Store original duration if not already stored
+  const originalDuration = (targetClip as any).originalDuration || (targetClip.endTime - targetClip.startTime);
+  
+  let newStartTime = targetClip.startTime;
+  let newEndTime = targetClip.endTime;
+
+  if (restore) {
+    // RESTORE: Reset to original duration
+    newStartTime = targetClip.startTime;
+    newEndTime = targetClip.startTime + originalDuration;
+    console.log(`🔄 Restoring clip ${clipIndex} to original duration: ${originalDuration}s`);
+  } else if (startTrim !== undefined && endTrim !== undefined) {
+    // RANGE TRIM: Keep only the range from startTrim to endTrim
+    newStartTime = targetClip.startTime + startTrim;
+    newEndTime = targetClip.startTime + endTrim;
+    console.log(`✂️ Trimming clip ${clipIndex} from ${startTrim}s to ${endTrim}s (keeping ${endTrim - startTrim}s)`);
+  } else if (startTrim !== undefined) {
+    // TRIM FROM START: Remove first X seconds
+    newStartTime = targetClip.startTime + startTrim;
+    newEndTime = targetClip.endTime;
+    console.log(`✂️ Removing first ${startTrim}s from clip ${clipIndex}`);
+  } else if (endTrim !== undefined) {
+    // TRIM TO END: Keep only first X seconds
+    newStartTime = targetClip.startTime;
+    newEndTime = targetClip.startTime + endTrim;
+    console.log(`✂️ Keeping first ${endTrim}s of clip ${clipIndex}`);
+  } else if (newDuration !== undefined) {
+    // DURATION TRIM: Trim to specific duration
+    newStartTime = targetClip.startTime;
+    newEndTime = targetClip.startTime + newDuration;
+    console.log(`✂️ Trimming clip ${clipIndex} to ${newDuration}s`);
+  }
+
+  const finalDuration = newEndTime - newStartTime;
+
   updatedMedia[clipIndex] = {
     ...targetClip,
-    endTime: targetClip.startTime + newDuration,
-    positionEnd: targetClip.positionStart + newDuration,
-  };
+    startTime: newStartTime,
+    endTime: newEndTime,
+    positionEnd: targetClip.positionStart + finalDuration,
+    originalDuration: originalDuration, // Preserve original duration
+  } as any;
 
   // Adjust positions of subsequent clips
   let currentPosition = updatedMedia[clipIndex].positionEnd;
