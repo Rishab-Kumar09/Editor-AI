@@ -356,9 +356,15 @@ async function handleSearchAndAddImages(
 
     // Download each image and add to project
     const newMediaFiles: MediaFile[] = [];
-    let currentPosition = currentMediaFiles.length > 0 
-      ? Math.max(...currentMediaFiles.map(m => m.positionEnd)) 
-      : 0;
+    
+    // Calculate video duration to place images within video timeframe
+    const videoDuration = currentMediaFiles.length > 0 
+      ? Math.max(...currentMediaFiles.filter(m => m.type === 'video').map(m => m.positionEnd))
+      : 30; // Default to 30 seconds if no video
+    
+    // Distribute images evenly throughout the video
+    const imageDuration = 3; // Default 3 seconds per image
+    const spacing = Math.max(imageDuration, videoDuration / images.length);
 
     for (let i = 0; i < images.length; i++) {
       const image = images[i];
@@ -373,9 +379,10 @@ async function handleSearchAndAddImages(
         const fileId = `image-${Date.now()}-${i}`;
         await storeFile(file, fileId);
 
-        // Create media file entry
-        const imageDuration = 3; // Default 3 seconds per image
-        const position = positions && positions[i] !== undefined ? positions[i] : currentPosition;
+        // Calculate position: distribute evenly within video duration
+        const position = positions && positions[i] !== undefined 
+          ? positions[i] 
+          : Math.min(i * spacing, videoDuration - imageDuration);
 
         const mediaFile: MediaFile = {
           id: `media-${Date.now()}-${i}`,
@@ -384,18 +391,17 @@ async function handleSearchAndAddImages(
           type: 'image',
           startTime: 0,
           endTime: imageDuration,
-          positionStart: position,
-          positionEnd: position + imageDuration,
+          positionStart: Math.max(0, position), // Ensure not negative
+          positionEnd: Math.max(0, position) + imageDuration,
           includeInMerge: true,
           playbackSpeed: 1,
           volume: 1,
-          zIndex: 0,
+          zIndex: 10 + i, // Higher zIndex so images appear on top of video
         };
 
         newMediaFiles.push(mediaFile);
-        currentPosition = position + imageDuration;
 
-        console.log(`📥 Downloaded: ${image.alt} (${image.source})`);
+        console.log(`📥 Downloaded: ${image.alt} at ${Math.max(0, position).toFixed(1)}s (${image.source})`);
       } catch (error) {
         console.error(`Failed to download image ${i + 1}:`, error);
       }
