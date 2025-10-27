@@ -27,11 +27,11 @@ export async function POST(request: NextRequest) {
     const openai = new OpenAI({ apiKey });
 
     // Transcribe with Whisper (with timestamps)
+    // Note: Using verbose_json for segment-level timestamps
     const transcription = await openai.audio.transcriptions.create({
       file: audioFile,
       model: 'whisper-1',
       response_format: 'verbose_json',
-      timestamp_granularities: ['word', 'segment'],
     });
 
     return NextResponse.json({
@@ -41,9 +41,20 @@ export async function POST(request: NextRequest) {
       language: transcription.language,
     });
   } catch (error: any) {
-    console.error('Transcription error:', error);
+    console.error('❌ Transcription error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      status: error.status,
+      type: error.type,
+      code: error.code,
+    });
+    
+    // Return more detailed error message
+    const errorMessage = error.message || 'Failed to transcribe audio';
+    const errorDetails = error.status ? ` (Status: ${error.status})` : '';
+    
     return NextResponse.json(
-      { error: error.message || 'Failed to transcribe audio' },
+      { error: `${errorMessage}${errorDetails}` },
       { status: 500 }
     );
   }
