@@ -26,16 +26,16 @@ export default function SettingsPage() {
       if (response.ok) {
         const data = await response.json();
         if (data.apiKey) {
-          setApiKey('•'.repeat(20) + data.apiKey.slice(-4));
+          setApiKey(data.apiKey); // Backend already masks it
         }
         if (data.pexelsApiKey) {
-          setPexelsKey('•'.repeat(20) + data.pexelsApiKey.slice(-4));
+          setPexelsKey(data.pexelsApiKey); // Backend already masks it
         }
         if (data.unsplashApiKey) {
-          setUnsplashKey('•'.repeat(20) + data.unsplashApiKey.slice(-4));
+          setUnsplashKey(data.unsplashApiKey); // Backend already masks it
         }
         if (data.pixabayApiKey) {
-          setPixabayKey('•'.repeat(20) + data.pixabayApiKey.slice(-4));
+          setPixabayKey(data.pixabayApiKey); // Backend already masks it
         }
       }
     } catch (error) {
@@ -44,7 +44,15 @@ export default function SettingsPage() {
   };
 
   const handleSaveOpenAI = async () => {
-    if (!apiKey || apiKey.startsWith('•') || !apiKey.startsWith('sk-')) {
+    // Validate: must start with sk-, must not be masked (contains '...')
+    if (!apiKey || !apiKey.startsWith('sk-') || apiKey.includes('...')) {
+      setSaveStatusOpenAI('error');
+      setTimeout(() => setSaveStatusOpenAI('idle'), 2000);
+      return;
+    }
+
+    // Additional check: key must be full length (not masked)
+    if (apiKey.length < 20) {
       setSaveStatusOpenAI('error');
       setTimeout(() => setSaveStatusOpenAI('idle'), 2000);
       return;
@@ -80,14 +88,22 @@ export default function SettingsPage() {
     setSaveStatusImages('idle');
 
     try {
+      // Only send keys that are NOT masked (don't contain '...')
+      const payload: any = {};
+      if (pexelsKey && !pexelsKey.includes('...') && pexelsKey.length > 10) {
+        payload.pexelsApiKey = pexelsKey;
+      }
+      if (unsplashKey && !unsplashKey.includes('...') && unsplashKey.length > 10) {
+        payload.unsplashApiKey = unsplashKey;
+      }
+      if (pixabayKey && !pixabayKey.includes('...') && pixabayKey.length > 10) {
+        payload.pixabayApiKey = pixabayKey;
+      }
+
       const response = await fetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          pexelsApiKey: pexelsKey.startsWith('•') ? undefined : pexelsKey,
-          unsplashApiKey: unsplashKey.startsWith('•') ? undefined : unsplashKey,
-          pixabayApiKey: pixabayKey.startsWith('•') ? undefined : pixabayKey,
-        })
+        body: JSON.stringify(payload)
       });
 
       if (response.ok) {

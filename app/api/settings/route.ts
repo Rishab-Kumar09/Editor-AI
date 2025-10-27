@@ -38,23 +38,23 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { apiKey, pexelsApiKey, unsplashApiKey, pixabayApiKey } = body;
 
-    // Save OpenAI API key if provided
-    if (apiKey && typeof apiKey === 'string' && apiKey.startsWith('sk-')) {
+    // Save OpenAI API key if provided (and not masked)
+    if (apiKey && typeof apiKey === 'string' && apiKey.startsWith('sk-') && !apiKey.includes('...')) {
       appSettings.apiKey = apiKey;
     }
 
-    // Save Pexels API key if provided
-    if (pexelsApiKey && typeof pexelsApiKey === 'string') {
+    // Save Pexels API key if provided (and not masked)
+    if (pexelsApiKey && typeof pexelsApiKey === 'string' && !pexelsApiKey.includes('...')) {
       appSettings.pexelsApiKey = pexelsApiKey;
     }
 
-    // Save Unsplash API key if provided
-    if (unsplashApiKey && typeof unsplashApiKey === 'string') {
+    // Save Unsplash API key if provided (and not masked)
+    if (unsplashApiKey && typeof unsplashApiKey === 'string' && !unsplashApiKey.includes('...')) {
       appSettings.unsplashApiKey = unsplashApiKey;
     }
 
-    // Save Pixabay API key if provided
-    if (pixabayApiKey && typeof pixabayApiKey === 'string') {
+    // Save Pixabay API key if provided (and not masked)
+    if (pixabayApiKey && typeof pixabayApiKey === 'string' && !pixabayApiKey.includes('...')) {
       appSettings.pixabayApiKey = pixabayApiKey;
     }
 

@@ -1,0 +1,20 @@
+[33mf83ff5f[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m  FIX: Black Screen Bug (Added Error Handling)
+[33m49a4e7e[m  CRITICAL FIX: Separate Save Buttons (Stops Overwriting OpenAI Key!)
+[33m6c732f0[m  UX FIX: Moved Save button to bottom (saves ALL settings)
+[33mb7a030e[m  FIXED: Real Image Search with API Keys (No More Placeholders!)
+[33mb396c9f[m  Cleanup: Remove unnecessary .md documentation files
+[33m25bdca4[m  MAJOR FEATURE: AI Image Search (No API Keys Required!)
+[33mb380622[m  CRITICAL FIX: Stop AI from hallucinating non-existent features
+[33m541b747[m  CRITICAL FIX: Make AI actually DO things instead of just TALKING
+[33m7e96d46[m  Update README & LICENSE for Editor AI
+[33m42223cd[m  FIX: Captions now actually add to timeline!
+[33me82796a[m  Add comprehensive Advanced Trim Guide
+[33m7254891[m  ADVANCED TRIM FEATURES - Complete Trim Control!
+[33mc7256e9[m  COMPLETE AI VIDEO EDITOR - IT ACTUALLY WORKS!
+[33m9beaffb[m  Document AI/UI improvements based on user feedback
+[33me7e69b6[m  MASSIVE UI/AI UPGRADE!
+[33m8940158[m  Add welcome back message for user
+[33meb05a87[m  Add comprehensive testing & documentation
+[33m64913a5[m  Fix: TypeScript errors for AI integration
+[33m8151707[m  AI VIDEO EDITING - FULLY FUNCTIONAL!
+[33m8b91520[m  AI Chat Integration Complete!
