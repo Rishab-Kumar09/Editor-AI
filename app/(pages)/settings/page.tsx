@@ -7,6 +7,9 @@ import { Settings, Key, Save, ArrowLeft } from 'lucide-react';
 export default function SettingsPage() {
   const router = useRouter();
   const [apiKey, setApiKey] = useState('');
+  const [pexelsKey, setPexelsKey] = useState('');
+  const [unsplashKey, setUnsplashKey] = useState('');
+  const [pixabayKey, setPixabayKey] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
@@ -21,8 +24,16 @@ export default function SettingsPage() {
       if (response.ok) {
         const data = await response.json();
         if (data.apiKey) {
-          // Show masked version
           setApiKey('•'.repeat(20) + data.apiKey.slice(-4));
+        }
+        if (data.pexelsApiKey) {
+          setPexelsKey('•'.repeat(20) + data.pexelsApiKey.slice(-4));
+        }
+        if (data.unsplashApiKey) {
+          setUnsplashKey('•'.repeat(20) + data.unsplashApiKey.slice(-4));
+        }
+        if (data.pixabayApiKey) {
+          setPixabayKey('•'.repeat(20) + data.pixabayApiKey.slice(-4));
         }
       }
     } catch (error) {
@@ -31,12 +42,6 @@ export default function SettingsPage() {
   };
 
   const handleSave = async () => {
-    if (!apiKey || apiKey.length < 20) {
-      setSaveStatus('error');
-      setTimeout(() => setSaveStatus('idle'), 2000);
-      return;
-    }
-
     setIsSaving(true);
     setSaveStatus('idle');
 
@@ -44,12 +49,18 @@ export default function SettingsPage() {
       const response = await fetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ apiKey })
+        body: JSON.stringify({ 
+          apiKey: apiKey.startsWith('•') ? undefined : apiKey,
+          pexelsApiKey: pexelsKey.startsWith('•') ? undefined : pexelsKey,
+          unsplashApiKey: unsplashKey.startsWith('•') ? undefined : unsplashKey,
+          pixabayApiKey: pixabayKey.startsWith('•') ? undefined : pixabayKey,
+        })
       });
 
       if (response.ok) {
         setSaveStatus('success');
         setTimeout(() => setSaveStatus('idle'), 2000);
+        loadSettings(); // Reload to show masked keys
       } else {
         setSaveStatus('error');
       }
@@ -137,6 +148,83 @@ export default function SettingsPage() {
                   </span>
                 )}
               </div>
+            </div>
+          </div>
+
+          {/* Image Search APIs Section */}
+          <div className="bg-white bg-opacity-5 rounded-lg p-6 border border-white border-opacity-10">
+            <div className="flex items-center gap-2 mb-4">
+              <Key size={20} />
+              <h2 className="text-xl font-semibold">Image Search APIs (Optional)</h2>
+            </div>
+            
+            <p className="text-sm text-gray-400 mb-4">
+              Add API keys to enable AI image search. <strong className="text-blue-400">All are FREE!</strong> Get them here:
+            </p>
+
+            <div className="space-y-4">
+              {/* Pexels API Key */}
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  🟢 Pexels API Key <span className="text-green-400">(RECOMMENDED - 20,000/month FREE!)</span>
+                </label>
+                <input
+                  type="password"
+                  value={pexelsKey}
+                  onChange={(e) => setPexelsKey(e.target.value)}
+                  placeholder="Get free key at https://www.pexels.com/api/"
+                  className="w-full px-4 py-3 bg-black bg-opacity-30 border border-white border-opacity-20 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 font-mono text-sm"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  <a href="https://www.pexels.com/api/" target="_blank" rel="noopener noreferrer" className="text-green-400 hover:underline">
+                    Get FREE Pexels Key →
+                  </a> (takes 2 minutes, no credit card)
+                </p>
+              </div>
+
+              {/* Unsplash API Key */}
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  🟡 Unsplash API Key <span className="text-gray-400">(50/hour FREE)</span>
+                </label>
+                <input
+                  type="password"
+                  value={unsplashKey}
+                  onChange={(e) => setUnsplashKey(e.target.value)}
+                  placeholder="Get free key at https://unsplash.com/developers"
+                  className="w-full px-4 py-3 bg-black bg-opacity-30 border border-white border-opacity-20 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 font-mono text-sm"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  <a href="https://unsplash.com/developers" target="_blank" rel="noopener noreferrer" className="text-yellow-400 hover:underline">
+                    Get FREE Unsplash Key →
+                  </a>
+                </p>
+              </div>
+
+              {/* Pixabay API Key */}
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  🔵 Pixabay API Key <span className="text-gray-400">(100/min FREE)</span>
+                </label>
+                <input
+                  type="password"
+                  value={pixabayKey}
+                  onChange={(e) => setPixabayKey(e.target.value)}
+                  placeholder="Get free key at https://pixabay.com/api/docs/"
+                  className="w-full px-4 py-3 bg-black bg-opacity-30 border border-white border-opacity-20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  <a href="https://pixabay.com/api/docs/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+                    Get FREE Pixabay Key →
+                  </a>
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6 bg-blue-900 bg-opacity-20 border border-blue-600 border-opacity-30 rounded-lg p-4">
+              <p className="text-sm text-blue-200">
+                💡 <strong>Tip:</strong> Add at least <strong>Pexels</strong> (most generous free tier). Without API keys, AI image search won&apos;t work!
+              </p>
             </div>
           </div>
 

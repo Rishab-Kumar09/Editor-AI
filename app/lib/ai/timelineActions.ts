@@ -335,7 +335,13 @@ async function handleSearchAndAddImages(
     });
 
     if (!response.ok) {
-      throw new Error('Image search failed');
+      const errorData = await response.json();
+      if (errorData.needsSetup) {
+        console.error('❌ Image search requires API keys! Please add them in Settings.');
+        console.error('   Go to Settings → Image Search APIs');
+        console.error('   Add at least Pexels API key (FREE at https://www.pexels.com/api/)');
+      }
+      throw new Error(errorData.error || 'Image search failed');
     }
 
     const data = await response.json();

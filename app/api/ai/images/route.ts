@@ -4,14 +4,14 @@ import { appSettings } from '@/app/lib/settings';
 /**
  * AI Image Search API
  * Searches multiple free image APIs (Pexels, Unsplash, Pixabay)
- * Falls back to Lorem Picsum if no API keys configured
+ * Requires at least one API key to be configured in Settings
  */
 
 interface ImageResult {
   id: string;
   url: string;
   thumbnail: string;
-  source: 'pexels' | 'unsplash' | 'pixabay' | 'lorem-picsum';
+  source: 'pexels' | 'unsplash' | 'pixabay';
   photographer?: string;
   alt: string;
 }
@@ -30,9 +30,17 @@ export async function POST(request: NextRequest) {
     console.log(`🔍 AI Image Search: "${query}" (requesting ${count} images)`);
 
     // Try to get API keys from settings (if configured)
-    const pexelsKey = (appSettings as any).pexelsApiKey || process.env.PEXELS_API_KEY;
-    const unsplashKey = (appSettings as any).unsplashApiKey || process.env.UNSPLASH_API_KEY;
-    const pixabayKey = (appSettings as any).pixabayApiKey || process.env.PIXABAY_API_KEY;
+    const pexelsKey = appSettings.pexelsApiKey || process.env.PEXELS_API_KEY;
+    const unsplashKey = appSettings.unsplashApiKey || process.env.UNSPLASH_API_KEY;
+    const pixabayKey = appSettings.pixabayApiKey || process.env.PIXABAY_API_KEY;
+
+    // Require at least one API key
+    if (!pexelsKey && !unsplashKey && !pixabayKey) {
+      return NextResponse.json({
+        error: 'No image search API keys configured. Please add at least one API key in Settings.',
+        needsSetup: true,
+      }, { status: 400 });
+    }
 
     const images: ImageResult[] = [];
 
@@ -67,13 +75,6 @@ export async function POST(request: NextRequest) {
       } catch (error) {
         console.error('Pixabay search failed:', error);
       }
-    }
-
-    // Fallback to Lorem Picsum if no API keys or not enough images
-    if (images.length < count) {
-      console.log('⚪ Falling back to Lorem Picsum (no API keys configured)');
-      const loremImages = await getLoremPicsumImages(count - images.length, query);
-      images.push(...loremImages);
     }
 
     console.log(`✅ Found ${images.length} images`);
@@ -173,28 +174,4 @@ async function searchPixabay(query: string, count: number, apiKey: string): Prom
   }));
 }
 
-/**
- * Fallback: Lorem Picsum (no API key needed)
- * Returns random high-quality placeholder images
- */
-async function getLoremPicsumImages(count: number, query: string): Promise<ImageResult[]> {
-  const images: ImageResult[] = [];
-  
-  // Generate random IDs to get different images
-  for (let i = 0; i < count; i++) {
-    const randomId = Math.floor(Math.random() * 1000);
-    const width = 1920;
-    const height = 1080;
-    
-    images.push({
-      id: `lorem-${randomId}-${i}`,
-      url: `https://picsum.photos/id/${randomId}/${width}/${height}`,
-      thumbnail: `https://picsum.photos/id/${randomId}/400/300`,
-      source: 'lorem-picsum' as const,
-      alt: `Image related to ${query}`,
-    });
-  }
-  
-  return images;
-}
 

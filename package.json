@@ -52,6 +52,7 @@
     "@vercel/analytics": "^1.5.0",
     "autoprefixer": "10.4.14",
     "basehub": "^8.2.11",
+    "electron-store": "^11.0.2",
     "eslint": "8.46.0",
     "eslint-config-next": "13.4.13",
     "idb": "^8.0.2",
