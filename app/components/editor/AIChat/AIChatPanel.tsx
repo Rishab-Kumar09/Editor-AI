@@ -70,11 +70,18 @@ export default function AIChatPanel() {
         throw new Error('Clip not found');
       }
 
-      // Get the file data
-      const file = await getFile(targetClip.id);
+      // Get the file data from IndexedDB
+      const file = await getFile(targetClip.fileId); // Use fileId, not id!
       if (!file) {
-        throw new Error('File data not found');
+        console.error('File not found in IndexedDB:', targetClip.fileId);
+        throw new Error('File data not found in storage');
       }
+      
+      console.log('📁 File loaded for transcription:', {
+        name: targetClip.fileName,
+        type: file.type,
+        size: (file.size / 1024 / 1024).toFixed(2) + ' MB'
+      });
 
       // Convert to audio-only for Whisper
       const formData = new FormData();
@@ -94,7 +101,8 @@ export default function AIChatPanel() {
       });
 
       if (!response.ok) {
-        throw new Error('Transcription failed');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Transcription failed');
       }
 
       const transcriptData = await response.json();
@@ -108,12 +116,12 @@ export default function AIChatPanel() {
         timestamp: new Date()
       };
       setMessages(prev => [...prev, successMsg]);
-    } catch (error) {
-      console.error('Transcription error:', error);
+    } catch (error: any) {
+      console.error('❌ Transcription error:', error);
       const errorMsg: Message = {
         id: Date.now().toString(),
         role: 'assistant',
-        content: '❌ Failed to transcribe video. Please check your API key and try again.',
+        content: `❌ Failed to transcribe video: ${error.message || 'Unknown error'}. Please check your API key and try again.`,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMsg]);
