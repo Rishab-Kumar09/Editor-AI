@@ -1,16 +1,31 @@
-MIT License
+Proprietary License
 
-Copyright (c) 2025 Mohy Ibrahim
+Copyright (c) 2025 Rishab Kumar
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+All Rights Reserved.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+This software and associated documentation files (the "Software") are the 
+proprietary and confidential property of Rishab Kumar.
+
+RESTRICTIONS:
+
+1. The Software is provided for viewing and evaluation purposes only.
+
+2. You may NOT:
+   - Use the Software for commercial purposes without explicit permission
+   - Copy, modify, merge, publish, distribute, sublicense, or sell copies 
+     of the Software
+   - Reverse engineer, decompile, or disassemble the Software
+   - Remove or alter any proprietary notices or labels on the Software
+
+3. The compiled executable ("Editor AI") may be distributed and sold by 
+   Rishab Kumar or authorized parties only.
+
+4. Contributions to this repository are welcome, but by contributing, you 
+   agree that all contributions become the property of Rishab Kumar and may 
+   be used in commercial versions of the Software.
+
+DISCLAIMER:
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -19,3 +34,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+For licensing inquiries or commercial use permissions, contact:
+GitHub: @Rishab-Kumar09
