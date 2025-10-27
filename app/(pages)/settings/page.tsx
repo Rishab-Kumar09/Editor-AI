@@ -10,8 +10,10 @@ export default function SettingsPage() {
   const [pexelsKey, setPexelsKey] = useState('');
   const [unsplashKey, setUnsplashKey] = useState('');
   const [pixabayKey, setPixabayKey] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [isSavingOpenAI, setIsSavingOpenAI] = useState(false);
+  const [isSavingImages, setIsSavingImages] = useState(false);
+  const [saveStatusOpenAI, setSaveStatusOpenAI] = useState<'idle' | 'success' | 'error'>('idle');
+  const [saveStatusImages, setSaveStatusImages] = useState<'idle' | 'success' | 'error'>('idle');
 
   useEffect(() => {
     // Load existing API key (masked)
@@ -41,16 +43,47 @@ export default function SettingsPage() {
     }
   };
 
-  const handleSave = async () => {
-    setIsSaving(true);
-    setSaveStatus('idle');
+  const handleSaveOpenAI = async () => {
+    if (!apiKey || apiKey.startsWith('•') || !apiKey.startsWith('sk-')) {
+      setSaveStatusOpenAI('error');
+      setTimeout(() => setSaveStatusOpenAI('idle'), 2000);
+      return;
+    }
+
+    setIsSavingOpenAI(true);
+    setSaveStatusOpenAI('idle');
+
+    try {
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ apiKey })
+      });
+
+      if (response.ok) {
+        setSaveStatusOpenAI('success');
+        setTimeout(() => setSaveStatusOpenAI('idle'), 2000);
+        loadSettings(); // Reload to show masked key
+      } else {
+        setSaveStatusOpenAI('error');
+      }
+    } catch (error) {
+      console.error('Failed to save OpenAI key:', error);
+      setSaveStatusOpenAI('error');
+    } finally {
+      setIsSavingOpenAI(false);
+    }
+  };
+
+  const handleSaveImageKeys = async () => {
+    setIsSavingImages(true);
+    setSaveStatusImages('idle');
 
     try {
       const response = await fetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          apiKey: apiKey.startsWith('•') ? undefined : apiKey,
           pexelsApiKey: pexelsKey.startsWith('•') ? undefined : pexelsKey,
           unsplashApiKey: unsplashKey.startsWith('•') ? undefined : unsplashKey,
           pixabayApiKey: pixabayKey.startsWith('•') ? undefined : pixabayKey,
@@ -58,17 +91,17 @@ export default function SettingsPage() {
       });
 
       if (response.ok) {
-        setSaveStatus('success');
-        setTimeout(() => setSaveStatus('idle'), 2000);
+        setSaveStatusImages('success');
+        setTimeout(() => setSaveStatusImages('idle'), 2000);
         loadSettings(); // Reload to show masked keys
       } else {
-        setSaveStatus('error');
+        setSaveStatusImages('error');
       }
     } catch (error) {
-      console.error('Failed to save settings:', error);
-      setSaveStatus('error');
+      console.error('Failed to save image keys:', error);
+      setSaveStatusImages('error');
     } finally {
-      setIsSaving(false);
+      setIsSavingImages(false);
     }
   };
 
@@ -125,6 +158,28 @@ export default function SettingsPage() {
                   placeholder="sk-..."
                   className="w-full px-4 py-3 bg-black bg-opacity-30 border border-white border-opacity-20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
                 />
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleSaveOpenAI}
+                  disabled={isSavingOpenAI}
+                  className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg transition font-semibold"
+                >
+                  <Save size={18} />
+                  {isSavingOpenAI ? 'Saving...' : 'Save OpenAI Key'}
+                </button>
+
+                {saveStatusOpenAI === 'success' && (
+                  <span className="text-green-400 text-sm font-medium">
+                    ✓ OpenAI key saved!
+                  </span>
+                )}
+                {saveStatusOpenAI === 'error' && (
+                  <span className="text-red-400 text-sm font-medium">
+                    ✗ Invalid API key
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -204,29 +259,28 @@ export default function SettingsPage() {
                 💡 <strong>Tip:</strong> Add at least <strong>Pexels</strong> (most generous free tier). Without API keys, AI image search won&apos;t work!
               </p>
             </div>
-          </div>
 
-          {/* Save All Button */}
-          <div className="flex items-center justify-center gap-4">
-            <button
-              onClick={handleSave}
-              disabled={isSaving}
-              className="flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg transition font-semibold text-lg shadow-lg"
-            >
-              <Save size={20} />
-              {isSaving ? 'Saving All Settings...' : 'Save All Settings'}
-            </button>
+            <div className="mt-6 flex items-center gap-3">
+              <button
+                onClick={handleSaveImageKeys}
+                disabled={isSavingImages}
+                className="flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg transition font-semibold"
+              >
+                <Save size={18} />
+                {isSavingImages ? 'Saving...' : 'Save Image API Keys'}
+              </button>
 
-            {saveStatus === 'success' && (
-              <span className="text-green-400 text-lg font-semibold">
-                ✓ All settings saved!
-              </span>
-            )}
-            {saveStatus === 'error' && (
-              <span className="text-red-400 text-lg font-semibold">
-                ✗ Failed to save
-              </span>
-            )}
+              {saveStatusImages === 'success' && (
+                <span className="text-green-400 text-sm font-medium">
+                  ✓ Image keys saved!
+                </span>
+              )}
+              {saveStatusImages === 'error' && (
+                <span className="text-red-400 text-sm font-medium">
+                  ✗ Failed to save
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Privacy Notice */}
