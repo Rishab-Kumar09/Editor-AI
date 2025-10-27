@@ -126,28 +126,6 @@ export default function SettingsPage() {
                   className="w-full px-4 py-3 bg-black bg-opacity-30 border border-white border-opacity-20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
                 />
               </div>
-
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={handleSave}
-                  disabled={isSaving}
-                  className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg transition font-semibold"
-                >
-                  <Save size={18} />
-                  {isSaving ? 'Saving...' : 'Save API Key'}
-                </button>
-
-                {saveStatus === 'success' && (
-                  <span className="text-green-400 text-sm font-medium">
-                    ✓ Saved successfully!
-                  </span>
-                )}
-                {saveStatus === 'error' && (
-                  <span className="text-red-400 text-sm font-medium">
-                    ✗ Invalid API key
-                  </span>
-                )}
-              </div>
             </div>
           </div>
 
@@ -226,6 +204,29 @@ export default function SettingsPage() {
                 💡 <strong>Tip:</strong> Add at least <strong>Pexels</strong> (most generous free tier). Without API keys, AI image search won&apos;t work!
               </p>
             </div>
+          </div>
+
+          {/* Save All Button */}
+          <div className="flex items-center justify-center gap-4">
+            <button
+              onClick={handleSave}
+              disabled={isSaving}
+              className="flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg transition font-semibold text-lg shadow-lg"
+            >
+              <Save size={20} />
+              {isSaving ? 'Saving All Settings...' : 'Save All Settings'}
+            </button>
+
+            {saveStatus === 'success' && (
+              <span className="text-green-400 text-lg font-semibold">
+                ✓ All settings saved!
+              </span>
+            )}
+            {saveStatus === 'error' && (
+              <span className="text-red-400 text-lg font-semibold">
+                ✗ Failed to save
+              </span>
+            )}
           </div>
 
           {/* Privacy Notice */}
