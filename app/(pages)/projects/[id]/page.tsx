@@ -19,7 +19,7 @@ import AIChatPanel from "@/app/components/editor/AIChat/AIChatPanel";
 import MediaProperties from "../../../components/editor/PropertiesSection/MediaProperties";
 import TextProperties from "../../../components/editor/PropertiesSection/TextProperties";
 import { Timeline } from "../../../components/editor/timeline/Timline";
-import { PreviewPlayer } from "../../../components/editor/player/remotion/Player";
+import InteractivePreview from "../../../components/editor/player/InteractivePreview";
 import { MediaFile } from "@/app/types";
 import ExportList from "../../../components/editor/AssetsPanel/tools-section/ExportList";
 import Image from "next/image";
@@ -165,7 +165,7 @@ export default function Project({ params }: { params: { id: string } }) {
                 {/* Center - Video Preview */}
                 <div className="flex items-center justify-center flex-col flex-[1] overflow-hidden">
                     <ProjectName />
-                    <PreviewPlayer />
+                    <InteractivePreview />
                 </div>
 
                 {/* Right Sidebar - AI Chat OR Element Properties */}
