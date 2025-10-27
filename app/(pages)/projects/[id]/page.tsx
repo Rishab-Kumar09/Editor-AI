@@ -38,32 +38,56 @@ export default function Project({ params }: { params: { id: string } }) {
         const loadProject = async () => {
             if (id) {
                 setIsLoading(true);
-                const project = await getProject(id);
-                if (project) {
-                    dispatch(setCurrentProject(id));
+                try {
+                    const project = await getProject(id);
+                    if (project) {
+                        dispatch(setCurrentProject(id));
+                        setIsLoading(false);
+                    } else {
+                        console.error('Project not found:', id);
+                        router.push('/');
+                    }
+                } catch (error) {
+                    console.error('Failed to load project:', error);
                     setIsLoading(false);
-                } else {
-                    router.push('/404');
+                    router.push('/');
                 }
             }
         };
         loadProject();
-    }, [id, dispatch]);
+    }, [id, dispatch, router]);
 
     // set project state from with the current project id
     useEffect(() => {
         const loadProject = async () => {
             if (currentProjectId) {
-                const project = await getProject(currentProjectId);
-                if (project) {
-                    dispatch(rehydrate(project));
+                try {
+                    const project = await getProject(currentProjectId);
+                    if (project) {
+                        dispatch(rehydrate(project));
 
-                    dispatch(setMediaFiles(await Promise.all(
-                        project.mediaFiles.map(async (media: MediaFile) => {
-                            const file = await getFile(media.fileId);
-                            return { ...media, src: URL.createObjectURL(file) };
-                        })
-                    )));
+                        // Load media files with error handling
+                        const mediaFilesWithSrc = await Promise.all(
+                            (project.mediaFiles || []).map(async (media: MediaFile) => {
+                                try {
+                                    const file = await getFile(media.fileId);
+                                    if (file) {
+                                        return { ...media, src: URL.createObjectURL(file) };
+                                    } else {
+                                        console.warn(`File not found for media ${media.id}:`, media.fileId);
+                                        return media; // Return media without src
+                                    }
+                                } catch (err) {
+                                    console.error(`Failed to load media file ${media.id}:`, err);
+                                    return media; // Return media without src
+                                }
+                            })
+                        );
+                        dispatch(setMediaFiles(mediaFilesWithSrc));
+                    }
+                } catch (error) {
+                    console.error('Failed to load project:', error);
+                    setIsLoading(false);
                 }
             }
         };
