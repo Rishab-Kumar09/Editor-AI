@@ -77,23 +77,69 @@ export default function AIChatPanel() {
         throw new Error('File data not found in storage');
       }
       
+      const fileSizeMB = file.size / 1024 / 1024;
       console.log('📁 File loaded for transcription:', {
         name: targetClip.fileName,
         type: file.type,
-        size: (file.size / 1024 / 1024).toFixed(2) + ' MB'
+        size: fileSizeMB.toFixed(2) + ' MB'
       });
-
-      // Convert to audio-only for Whisper
-      const formData = new FormData();
-      formData.append('audio', file);
 
       const msg: Message = {
         id: Date.now().toString(),
         role: 'assistant',
-        content: '🎤 Transcribing your video with Whisper... This may take a moment!',
+        content: fileSizeMB > 20 
+          ? '🎤 Extracting and compressing audio... This may take a moment!'
+          : '🎤 Transcribing your video with Whisper... This may take a moment!',
         timestamp: new Date()
       };
       setMessages(prev => [...prev, msg]);
+
+      // Extract audio if video is large (> 20 MB) or always extract for better compatibility
+      let audioFile = file;
+      if (file.type.startsWith('video/') && fileSizeMB > 20) {
+        console.log('📦 File too large, extracting audio...');
+        
+        try {
+          // Dynamic import ffmpeg
+          const { FFmpeg } = await import('@ffmpeg/ffmpeg');
+          const { fetchFile } = await import('@ffmpeg/util');
+          
+          const ffmpeg = new FFmpeg();
+          await ffmpeg.load();
+          
+          // Write input file
+          await ffmpeg.writeFile('input', await fetchFile(file));
+          
+          // Extract audio with compression (64k bitrate MP3)
+          await ffmpeg.exec([
+            '-i', 'input',
+            '-vn', // No video
+            '-acodec', 'libmp3lame',
+            '-ab', '64k', // 64 kbps audio bitrate (small size)
+            '-ar', '16000', // 16kHz sample rate (Whisper works fine with this)
+            'output.mp3'
+          ]);
+          
+          // Read output
+          const data = await ffmpeg.readFile('output.mp3');
+          audioFile = new File([data], 'audio.mp3', { type: 'audio/mp3' });
+          
+          console.log('✅ Audio extracted:', (audioFile.size / 1024 / 1024).toFixed(2) + ' MB');
+        } catch (ffmpegError) {
+          console.error('FFmpeg extraction failed:', ffmpegError);
+          console.log('⚠️ Falling back to original file...');
+          // Fall back to original file if extraction fails
+        }
+      }
+
+      // Check if still too large
+      if (audioFile.size > 25 * 1024 * 1024) {
+        throw new Error(`File too large (${(audioFile.size / 1024 / 1024).toFixed(1)} MB). Maximum is 25 MB. Please use a shorter video or compress it first.`);
+      }
+
+      // Send to Whisper API
+      const formData = new FormData();
+      formData.append('audio', audioFile);
 
       const response = await fetch('/api/ai/transcribe', {
         method: 'POST',
