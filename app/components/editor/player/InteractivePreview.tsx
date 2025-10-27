@@ -4,15 +4,16 @@ import { useRef, useEffect, useState } from 'react';
 import { PreviewPlayer } from './remotion/Player';
 import Moveable from 'react-moveable';
 import { useAppDispatch, useAppSelector } from '@/app/store';
-import { setMediaFiles, setActiveElement, setActiveElementIndex } from '@/app/store/slices/projectSlice';
+import { setMediaFiles } from '@/app/store/slices/projectSlice';
 import { MediaFile } from '@/app/types';
 
 /**
  * Interactive Preview with KineMaster-style controls
- * - Click to select images
- * - Drag to reposition
+ * - Select images from timeline
+ * - Drag to reposition in preview
  * - Resize with corner handles
  * - Rotate with handle
+ * - Real-time visual feedback
  */
 export default function InteractivePreview() {
   const dispatch = useAppDispatch();
@@ -58,11 +59,6 @@ export default function InteractivePreview() {
     dispatch(setMediaFiles(
       mediaFiles.map((m) => (m.id === id ? { ...m, ...updates } : m))
     ));
-  };
-
-  const handleSelectImage = (image: MediaFile, index: number) => {
-    dispatch(setActiveElement('media'));
-    dispatch(setActiveElementIndex(index));
   };
 
   return (
@@ -138,42 +134,6 @@ export default function InteractivePreview() {
           )}
         </>
       )}
-
-      {/* Click overlay to select images */}
-      <div
-        className="absolute inset-0 pointer-events-auto"
-        style={{ zIndex: 100 }}
-        onClick={(e) => {
-          // Calculate click position relative to canvas
-          const rect = containerRef.current?.getBoundingClientRect();
-          if (!rect) return;
-
-          const clickX = (e.clientX - rect.left) / scaleX;
-          const clickY = (e.clientY - rect.top) / scaleY;
-
-          // Find clicked image
-          const clickedImage = mediaFiles
-            .map((m, index) => ({ ...m, index }))
-            .filter(
-              (m) =>
-                m.type === 'image' &&
-                currentTime >= m.positionStart &&
-                currentTime <= m.positionEnd
-            )
-            .reverse() // Check top layers first (higher zIndex)
-            .find((m) => {
-              const x = m.x || 0;
-              const y = m.y || 0;
-              const w = m.width || 1920;
-              const h = m.height || 1080;
-              return clickX >= x && clickX <= x + w && clickY >= y && clickY <= y + h;
-            });
-
-          if (clickedImage) {
-            handleSelectImage(clickedImage, clickedImage.index);
-          }
-        }}
-      />
     </div>
   );
 }
