@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { captionStyles } from '@/app/lib/ai/captionStyles';
 
 interface Word {
   word: string;
@@ -15,7 +16,7 @@ interface CaptionSegment {
 
 export async function POST(request: NextRequest) {
   try {
-    const { words, maxWordsPerLine = 3 } = await request.json();
+    const { words, maxWordsPerLine = 3, styleId = 'mrbeast' } = await request.json();
 
     if (!words || !Array.isArray(words)) {
       return NextResponse.json(
@@ -23,6 +24,9 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Get the style
+    const style = captionStyles[styleId] || captionStyles.mrbeast;
 
     // Group words into caption segments
     const segments: CaptionSegment[] = [];
@@ -36,7 +40,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    return NextResponse.json({ segments });
+    return NextResponse.json({ segments, style });
   } catch (error: any) {
     console.error('Caption generation error:', error);
     return NextResponse.json(

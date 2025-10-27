@@ -143,6 +143,7 @@ export default function AIChatPanel() {
         body: JSON.stringify({
           words: transcript.words,
           maxWordsPerLine: 3,
+          styleId: params.styleId || selectedCaptionStyle,
         }),
       });
 
@@ -150,18 +151,41 @@ export default function AIChatPanel() {
         throw new Error('Caption generation failed');
       }
 
-      const { segments } = await response.json();
+      const { segments, style } = await response.json();
+
+      // Actually add captions to the timeline!
+      const captionElements = segments.map((seg: any, index: number) => ({
+        id: `caption-${Date.now()}-${index}`,
+        text: seg.text,
+        positionStart: seg.start,
+        positionEnd: seg.end,
+        x: style.position?.x === 'left' ? 10 : style.position?.x === 'right' ? 90 : 50,
+        y: style.position?.y === 'top' ? 10 : style.position?.y === 'bottom' ? 90 : 50,
+        fontSize: style.fontSize || 48,
+        font: style.fontFamily || 'Arial Black',
+        color: style.color || '#FFFFFF',
+        backgroundColor: style.backgroundColor,
+        align: 'center' as const,
+        fadeInDuration: 0.1,
+        fadeOutDuration: 0.1,
+      }));
+
+      // Add to timeline using the action executor
+      await executeTimelineActions(
+        [{ type: 'add_multiple_text', params: { textElements: captionElements } }],
+        dispatch,
+        mediaFiles,
+        [...textElements, ...captionElements]
+      );
 
       const msg: Message = {
         id: Date.now().toString(),
         role: 'assistant',
-        content: `✅ Generated ${segments.length} caption segments! (Note: Adding captions to timeline is coming soon - for now you can see the transcript above!)`,
+        content: `✅ Added ${segments.length} captions to your timeline! You can edit them individually or adjust their style.`,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, msg]);
-
-      // TODO: Add each caption segment as a text element with the selected style
-      console.log('Caption segments:', segments);
+      setShowCaptionPicker(false);
     } catch (error) {
       console.error('Caption error:', error);
       const msg: Message = {

@@ -151,6 +151,17 @@ export const CAPTION_STYLES: CaptionStyle[] = [
 ];
 
 /**
+ * Caption styles as an object map for easy access
+ */
+export const captionStyles: Record<string, CaptionStyle> = CAPTION_STYLES.reduce(
+  (acc, style) => {
+    acc[style.id] = style;
+    return acc;
+  },
+  {} as Record<string, CaptionStyle>
+);
+
+/**
  * Get caption style by ID
  */
 export function getCaptionStyle(styleId: string): CaptionStyle | undefined {

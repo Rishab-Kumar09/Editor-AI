@@ -43,6 +43,10 @@ export async function executeTimelineActions(
           await handleAddText(dispatch, currentTextElements || [], action.params);
           break;
 
+        case 'add_multiple_text':
+          await handleAddMultipleText(dispatch, currentTextElements || [], action.params);
+          break;
+
         case 'trim_clip':
           await handleTrimClip(dispatch, currentMediaFiles, action.params);
           break;
@@ -189,6 +193,21 @@ async function handleAddText(
 
   // Add new text element to existing array
   dispatch(setTextElements([...currentTextElements, newTextElement]));
+}
+
+/**
+ * Add multiple text overlays (e.g., captions) to timeline
+ */
+async function handleAddMultipleText(
+  dispatch: Dispatch,
+  currentTextElements: TextElement[],
+  params: { textElements: TextElement[] }
+) {
+  const { textElements } = params;
+  console.log(`✨ Adding ${textElements.length} text elements to timeline`);
+
+  // Add all new text elements to existing array
+  dispatch(setTextElements([...currentTextElements, ...textElements]));
 }
 
 /**
