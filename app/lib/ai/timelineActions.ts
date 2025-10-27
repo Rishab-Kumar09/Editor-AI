@@ -379,6 +379,9 @@ async function handleSearchAndAddImages(
         const fileId = `image-${Date.now()}-${i}`;
         await storeFile(file, fileId);
 
+        // Create blob URL for immediate display (critical for video player!)
+        const blobUrl = URL.createObjectURL(blob);
+
         // Calculate position: distribute evenly within video duration
         const position = positions && positions[i] !== undefined 
           ? positions[i] 
@@ -389,6 +392,7 @@ async function handleSearchAndAddImages(
           fileName: file.name,
           fileId: fileId,
           type: 'image',
+          src: blobUrl, // CRITICAL: Add src so video player can display it!
           startTime: 0,
           endTime: imageDuration,
           positionStart: Math.max(0, position), // Ensure not negative
