@@ -145,7 +145,7 @@ export default function SettingsPage() {
             <h3 className="font-semibold text-yellow-200 mb-2">🔐 Privacy & Security</h3>
             <ul className="text-sm text-yellow-100 space-y-1">
               <li>• Your API key is stored locally on your computer</li>
-              <li>• It's encrypted and never sent to our servers</li>
+              <li>• It&apos;s encrypted and never sent to our servers</li>
               <li>• Only you have access to your key</li>
               <li>• API calls go directly to OpenAI</li>
             </ul>

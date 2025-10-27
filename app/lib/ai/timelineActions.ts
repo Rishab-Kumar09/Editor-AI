@@ -43,6 +43,17 @@ export async function executeTimelineActions(
           console.log('Add text action:', action.params);
           break;
         
+        case 'ask_image_source':
+          // User needs to choose: uploaded images or internet search
+          // This will be handled in the chat UI
+          console.log('AI is asking about image source:', action.params);
+          break;
+        
+        case 'instruct_manual':
+          // Manual instructions - will be shown in chat
+          console.log('AI provided manual instructions:', action.params);
+          break;
+        
         default:
           console.warn('Unknown action type:', action.type);
       }

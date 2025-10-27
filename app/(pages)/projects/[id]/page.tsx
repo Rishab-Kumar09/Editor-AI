@@ -113,31 +113,30 @@ export default function Project({ params }: { params: { id: string } }) {
                     </div>
                 </div>
 
-                {/* Add media and text */}
-                <div className="flex-[0.3] min-w-[200px] max-w-[400px] border-r border-gray-800 overflow-hidden flex flex-col">
-                    {activeSection === "ai" && (
-                        <AIChatPanel />
-                    )}
-                    {activeSection === "media" && (
-                        <div className="overflow-y-auto p-4">
-                            <h2 className="text-lg flex flex-row gap-2 items-center justify-center font-semibold mb-2">
-                                <AddMedia />
-                            </h2>
-                            <MediaList />
-                        </div>
-                    )}
-                    {activeSection === "text" && (
-                        <div className="overflow-y-auto p-4">
-                            <AddText />
-                        </div>
-                    )}
-                    {activeSection === "export" && (
-                        <div className="overflow-y-auto p-4">
-                            <h2 className="text-lg font-semibold mb-4">Export</h2>
-                            <ExportList />
-                        </div>
-                    )}
-                </div>
+                {/* Left Panel - Media, Text, Export (NOT AI) */}
+                {activeSection !== "ai" && (
+                    <div className="flex-[0.3] min-w-[200px] max-w-[400px] border-r border-gray-800 overflow-hidden flex flex-col">
+                        {activeSection === "media" && (
+                            <div className="overflow-y-auto p-4">
+                                <h2 className="text-lg flex flex-row gap-2 items-center justify-center font-semibold mb-2">
+                                    <AddMedia />
+                                </h2>
+                                <MediaList />
+                            </div>
+                        )}
+                        {activeSection === "text" && (
+                            <div className="overflow-y-auto p-4">
+                                <AddText />
+                            </div>
+                        )}
+                        {activeSection === "export" && (
+                            <div className="overflow-y-auto p-4">
+                                <h2 className="text-lg font-semibold mb-4">Export</h2>
+                                <ExportList />
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 {/* Center - Video Preview */}
                 <div className="flex items-center justify-center flex-col flex-[1] overflow-hidden">
@@ -145,18 +144,24 @@ export default function Project({ params }: { params: { id: string } }) {
                     <PreviewPlayer />
                 </div>
 
-                {/* Right Sidebar - Element Properties */}
-                <div className="flex-[0.4] min-w-[200px] border-l border-gray-800 overflow-y-auto p-4">
-                    {activeElement === "media" && (
-                        <div>
-                            <h2 className="text-lg font-semibold mb-4">Media Properties</h2>
-                            <MediaProperties />
-                        </div>
-                    )}
-                    {activeElement === "text" && (
-                        <div>
-                            <h2 className="text-lg font-semibold mb-4">Text Properties</h2>
-                            <TextProperties />
+                {/* Right Sidebar - AI Chat OR Element Properties */}
+                <div className={`${activeSection === "ai" ? "flex-[0.5] min-w-[400px] max-w-[600px]" : "flex-[0.4] min-w-[200px]"} border-l border-gray-800 overflow-hidden flex flex-col`}>
+                    {activeSection === "ai" ? (
+                        <AIChatPanel />
+                    ) : (
+                        <div className="overflow-y-auto p-4">
+                            {activeElement === "media" && (
+                                <div>
+                                    <h2 className="text-lg font-semibold mb-4">Media Properties</h2>
+                                    <MediaProperties />
+                                </div>
+                            )}
+                            {activeElement === "text" && (
+                                <div>
+                                    <h2 className="text-lg font-semibold mb-4">Text Properties</h2>
+                                    <TextProperties />
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
