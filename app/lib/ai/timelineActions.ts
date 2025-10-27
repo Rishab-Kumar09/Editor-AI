@@ -1,6 +1,6 @@
 import { Dispatch } from '@reduxjs/toolkit';
-import { setMediaFiles } from '@/app/store/slices/projectSlice';
-import { MediaFile } from '@/app/types';
+import { setMediaFiles, setTextElements } from '@/app/store/slices/projectSlice';
+import { MediaFile, TextElement } from '@/app/types';
 
 interface AIAction {
   type: string;
@@ -13,7 +13,8 @@ interface AIAction {
 export async function executeTimelineActions(
   actions: AIAction[],
   dispatch: Dispatch,
-  currentMediaFiles: MediaFile[]
+  currentMediaFiles: MediaFile[],
+  currentTextElements?: TextElement[]
 ) {
   for (const action of actions) {
     try {
@@ -21,39 +22,51 @@ export async function executeTimelineActions(
         case 'add_all_media':
           await handleAddAllMedia(dispatch, currentMediaFiles);
           break;
-        
+
         case 'clear_timeline':
           await handleClearTimeline(dispatch);
           break;
-        
+
         case 'add_transition':
           await handleAddTransition(dispatch, currentMediaFiles, action.params);
           break;
-        
+
         case 'speed_up':
           await handleSpeedChange(dispatch, currentMediaFiles, action.params, 'faster');
           break;
-        
+
         case 'slow_down':
           await handleSpeedChange(dispatch, currentMediaFiles, action.params, 'slower');
           break;
-        
+
         case 'add_text':
-          // TODO: Implement text addition
-          console.log('Add text action:', action.params);
+          await handleAddText(dispatch, currentTextElements || [], action.params);
           break;
-        
+
+        case 'trim_clip':
+          await handleTrimClip(dispatch, currentMediaFiles, action.params);
+          break;
+
+        case 'add_captions':
+          await handleAddCaptions(dispatch, currentMediaFiles, action.params);
+          break;
+
+        case 'transcribe_video':
+          // Trigger transcription - will be handled in the UI
+          console.log('AI triggering transcription:', action.params);
+          break;
+
         case 'ask_image_source':
           // User needs to choose: uploaded images or internet search
           // This will be handled in the chat UI
           console.log('AI is asking about image source:', action.params);
           break;
-        
+
         case 'instruct_manual':
           // Manual instructions - will be shown in chat
           console.log('AI provided manual instructions:', action.params);
           break;
-        
+
         default:
           console.warn('Unknown action type:', action.type);
       }
@@ -119,7 +132,7 @@ async function handleSpeedChange(
 ) {
   const { clipIndex, speed } = params;
   const targetClip = currentMediaFiles[clipIndex];
-  
+
   if (!targetClip) {
     console.warn('Clip not found at index:', clipIndex);
     return;
@@ -150,5 +163,82 @@ async function handleSpeedChange(
   }
 
   dispatch(setMediaFiles(updatedMedia));
+}
+
+/**
+ * Add text overlay to timeline
+ */
+async function handleAddText(
+  dispatch: Dispatch,
+  currentTextElements: TextElement[],
+  params: { text: string; start: number; duration: number; style?: any }
+) {
+  const { text, start, duration, style } = params;
+
+  const newTextElement: TextElement = {
+    id: `text-${Date.now()}`,
+    text: text,
+    positionStart: start,
+    positionEnd: start + duration,
+    fontSize: style?.fontSize || 48,
+    font: style?.font || 'Arial',
+    color: style?.color || '#FFFFFF',
+    x: style?.x || 50,
+    y: style?.y || 50,
+  };
+
+  // Add new text element to existing array
+  dispatch(setTextElements([...currentTextElements, newTextElement]));
+}
+
+/**
+ * Trim clip to specific duration
+ */
+async function handleTrimClip(
+  dispatch: Dispatch,
+  currentMediaFiles: MediaFile[],
+  params: { clipIndex: number; newDuration: number }
+) {
+  const { clipIndex, newDuration } = params;
+  const targetClip = currentMediaFiles[clipIndex];
+
+  if (!targetClip) {
+    console.warn('Clip not found at index:', clipIndex);
+    return;
+  }
+
+  const updatedMedia = [...currentMediaFiles];
+  updatedMedia[clipIndex] = {
+    ...targetClip,
+    endTime: targetClip.startTime + newDuration,
+    positionEnd: targetClip.positionStart + newDuration,
+  };
+
+  // Adjust positions of subsequent clips
+  let currentPosition = updatedMedia[clipIndex].positionEnd;
+  for (let i = clipIndex + 1; i < updatedMedia.length; i++) {
+    const duration = updatedMedia[i].endTime - updatedMedia[i].startTime;
+    updatedMedia[i] = {
+      ...updatedMedia[i],
+      positionStart: currentPosition,
+      positionEnd: currentPosition + duration,
+    };
+    currentPosition += duration;
+  }
+
+  dispatch(setMediaFiles(updatedMedia));
+}
+
+/**
+ * Add auto-generated captions
+ */
+async function handleAddCaptions(
+  dispatch: Dispatch,
+  currentMediaFiles: MediaFile[],
+  params: { clipIndex: number; styleId?: string }
+) {
+  console.log('Adding captions to clip:', params);
+  // This will trigger the transcription + caption workflow in the UI
+  // The actual implementation will be in the AIChatPanel component
 }
 
