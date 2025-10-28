@@ -463,6 +463,22 @@ export default function AIChatPanel() {
               handleAddCaptions({ clipIndex: 0, styleId });
               setShowCaptionPicker(false);
             }}
+            onApplyCustomSettings={async (settings) => {
+              // Apply custom settings to all captions using AI action
+              await executeTimelineActions(
+                [{ type: 'adjust_all_captions', params: settings }],
+                dispatch,
+                mediaFiles,
+                textElements
+              );
+              const msg: Message = {
+                id: Date.now().toString(),
+                role: 'assistant',
+                content: `✅ Applied custom caption settings!`,
+                timestamp: new Date()
+              };
+              setMessages(prev => [...prev, msg]);
+            }}
           />
         </div>
       ) : (

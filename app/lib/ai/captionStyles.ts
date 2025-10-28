@@ -148,6 +148,62 @@ export const CAPTION_STYLES: CaptionStyle[] = [
       y: 'top',
     },
   },
+  {
+    id: 'clean_white',
+    name: 'Clean White',
+    description: 'Simple white captions with semi-transparent black background',
+    fontFamily: 'Arial, sans-serif',
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    textTransform: 'none',
+    position: {
+      x: 'center',
+      y: 'bottom',
+    },
+  },
+  {
+    id: 'karaoke',
+    name: 'Karaoke Style',
+    description: 'White text with yellow highlight - NOTE: Highlight on active word requires word-level timing',
+    fontFamily: 'Arial Black, sans-serif',
+    fontSize: 56,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    backgroundColor: 'rgba(0,0,0,0.8)',
+    strokeColor: '#000000',
+    strokeWidth: 2,
+    textTransform: 'uppercase',
+    animation: {
+      type: 'highlight',
+      duration: 0.1,
+    },
+    position: {
+      x: 'center',
+      y: 'bottom',
+    },
+  },
+  {
+    id: 'minimalist',
+    name: 'Minimalist',
+    description: 'Small, subtle white text',
+    fontFamily: 'Helvetica Neue, sans-serif',
+    fontSize: 36,
+    fontWeight: 'normal',
+    color: '#FFFFFF',
+    textTransform: 'none',
+    shadow: {
+      x: 1,
+      y: 1,
+      blur: 2,
+      color: 'rgba(0,0,0,0.6)',
+    },
+    position: {
+      x: 'center',
+      y: 'bottom',
+    },
+  },
 ];
 
 /**
