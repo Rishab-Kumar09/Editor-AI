@@ -197,6 +197,7 @@ export default function Projects() {
                             <input
                                 type="text"
                                 ref={inputRef}
+                                autoFocus
                                 value={newProjectName}
                                 onChange={(e) => setNewProjectName(e.target.value)}
                                 onKeyDown={(e) => {
