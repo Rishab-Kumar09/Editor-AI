@@ -41,6 +41,8 @@ AVAILABLE ACTIONS:
   * color: hex color (e.g., "#FFFFFF", "#FFFF00")
   * backgroundColor: hex with alpha (e.g., "rgba(0,0,0,0.7)")
   * Examples: "center subtitles" → y:500, "bigger subtitles" → fontSize:64, "move to bottom" → y:950
+- remove_all_captions: 🗑️ Remove ALL captions/subtitles from timeline (params: {})
+  * Use when user says: "remove subtitles", "delete captions", "clear all text"
 - search_and_add_images: 🆕 Search and download images from internet! (params: {query, count, positions?})
 - ask_image_source: Ask if user wants images from uploaded files or internet (params: {context})
 - instruct_manual: Give manual instructions ONLY for features not yet implemented (params: {feature, steps})
@@ -183,6 +185,15 @@ Response:
   "message": "Styling your captions with yellow text and black background!",
   "actions": [
     { "type": "adjust_all_captions", "params": { "color": "#FFFF00", "backgroundColor": "rgba(0,0,0,0.8)" } }
+  ]
+}
+
+User: "Remove subtitles" / "Delete captions" / "Clear all text"
+Response:
+{
+  "message": "Removing all captions from your timeline!",
+  "actions": [
+    { "type": "remove_all_captions", "params": {} }
   ]
 }
 

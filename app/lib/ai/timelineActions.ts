@@ -59,6 +59,10 @@ export async function executeTimelineActions(
           await handleAdjustAllCaptions(dispatch, currentTextElements || [], action.params);
           break;
 
+        case 'remove_all_captions':
+          await handleRemoveAllCaptions(dispatch);
+          break;
+
         case 'transcribe_video':
           // Trigger transcription - will be handled in the UI
           console.log('AI triggering transcription:', action.params);
@@ -461,5 +465,14 @@ async function handleAdjustAllCaptions(
 
   dispatch(setTextElements(updatedTextElements));
   console.log(`✅ Updated all captions!`);
+}
+
+/**
+ * Remove all captions/subtitles from timeline
+ */
+async function handleRemoveAllCaptions(dispatch: Dispatch) {
+  console.log('🗑️ Removing all captions/subtitles from timeline');
+  dispatch(setTextElements([]));
+  console.log('✅ All captions removed!');
 }
 

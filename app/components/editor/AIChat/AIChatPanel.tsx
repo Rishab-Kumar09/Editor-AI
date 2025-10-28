@@ -420,26 +420,26 @@ export default function AIChatPanel() {
         </div>
         <div className="flex gap-2">
           {transcript && (
-            <>
-              <button
-                onClick={() => {
-                  setShowTranscript(!showTranscript);
-                  setShowCaptionPicker(false);
-                }}
-                className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition"
-              >
-                {showTranscript ? 'Hide' : 'Show'} Transcript
-              </button>
-              <button
-                onClick={() => {
-                  setShowCaptionPicker(!showCaptionPicker);
-                  setShowTranscript(false);
-                }}
-                className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-lg transition"
-              >
-                🎨 Caption Style
-              </button>
-            </>
+            <button
+              onClick={() => {
+                setShowTranscript(!showTranscript);
+                setShowCaptionPicker(false);
+              }}
+              className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition"
+            >
+              {showTranscript ? 'Hide' : 'Show'} Transcript
+            </button>
+          )}
+          {(transcript || textElements.length > 0) && (
+            <button
+              onClick={() => {
+                setShowCaptionPicker(!showCaptionPicker);
+                setShowTranscript(false);
+              }}
+              className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-lg transition font-semibold"
+            >
+              🎨 Caption Style
+            </button>
           )}
         </div>
       </div>
