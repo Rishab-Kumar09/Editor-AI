@@ -49,6 +49,7 @@ export default function Projects() {
             lastModified: new Date().toISOString(),
             mediaFiles: [],
             textElements: [],
+            transcript: null,
             currentTime: 0,
             isPlaying: false,
             isMuted: false,

@@ -55,6 +55,10 @@ export async function executeTimelineActions(
           await handleAddCaptions(dispatch, currentMediaFiles, action.params);
           break;
 
+        case 'adjust_all_captions':
+          await handleAdjustAllCaptions(dispatch, currentTextElements || [], action.params);
+          break;
+
         case 'transcribe_video':
           // Trigger transcription - will be handled in the UI
           console.log('AI triggering transcription:', action.params);
@@ -426,5 +430,36 @@ async function handleSearchAndAddImages(
   } catch (error) {
     console.error('Image search error:', error);
   }
+}
+
+/**
+ * Adjust all caption properties at once
+ * Params: {fontSize?, y?, color?, backgroundColor?}
+ */
+async function handleAdjustAllCaptions(
+  dispatch: Dispatch,
+  currentTextElements: TextElement[],
+  params: {
+    fontSize?: number;
+    y?: number;
+    color?: string;
+    backgroundColor?: string;
+  }
+) {
+  const { fontSize, y, color, backgroundColor } = params;
+  
+  console.log(`🎨 Adjusting all ${currentTextElements.length} captions:`, params);
+
+  // Update all text elements with new properties
+  const updatedTextElements = currentTextElements.map((text) => ({
+    ...text,
+    ...(fontSize !== undefined && { fontSize }),
+    ...(y !== undefined && { y }),
+    ...(color !== undefined && { color }),
+    ...(backgroundColor !== undefined && { backgroundColor }),
+  }));
+
+  dispatch(setTextElements(updatedTextElements));
+  console.log(`✅ Updated all captions!`);
 }
 

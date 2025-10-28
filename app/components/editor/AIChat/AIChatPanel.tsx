@@ -418,17 +418,30 @@ export default function AIChatPanel() {
           <Sparkles size={20} className="text-blue-400" />
           <h3 className="font-semibold text-lg">AI Assistant</h3>
         </div>
-        {transcript && (
-          <button
-            onClick={() => {
-              setShowTranscript(!showTranscript);
-              setShowCaptionPicker(false);
-            }}
-            className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition"
-          >
-            {showTranscript ? 'Hide' : 'Show'} Transcript
-          </button>
-        )}
+        <div className="flex gap-2">
+          {transcript && (
+            <>
+              <button
+                onClick={() => {
+                  setShowTranscript(!showTranscript);
+                  setShowCaptionPicker(false);
+                }}
+                className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition"
+              >
+                {showTranscript ? 'Hide' : 'Show'} Transcript
+              </button>
+              <button
+                onClick={() => {
+                  setShowCaptionPicker(!showCaptionPicker);
+                  setShowTranscript(false);
+                }}
+                className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-lg transition"
+              >
+                🎨 Caption Style
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Content Area */}

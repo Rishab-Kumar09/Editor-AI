@@ -35,6 +35,12 @@ AVAILABLE ACTIONS:
 - transcribe_video: Transcribe video audio with timestamps (params: {clipIndex, forceRetranscribe?: boolean})
   * Transcripts are saved automatically and reused!
   * Use forceRetranscribe: true ONLY if user explicitly says "transcribe again" or "re-transcribe"
+- adjust_all_captions: 🎨 Adjust ALL caption properties at once! (params: {fontSize?, y?, color?, backgroundColor?})
+  * fontSize: number (e.g., 48, 64, 32)
+  * y: number - Position (80=top, 500=center, 950=bottom)
+  * color: hex color (e.g., "#FFFFFF", "#FFFF00")
+  * backgroundColor: hex with alpha (e.g., "rgba(0,0,0,0.7)")
+  * Examples: "center subtitles" → y:500, "bigger subtitles" → fontSize:64, "move to bottom" → y:950
 - search_and_add_images: 🆕 Search and download images from internet! (params: {query, count, positions?})
 - ask_image_source: Ask if user wants images from uploaded files or internet (params: {context})
 - instruct_manual: Give manual instructions ONLY for features not yet implemented (params: {feature, steps})
@@ -141,6 +147,42 @@ Response:
   "message": "Speeding up the second clip to 2x! It'll be twice as fast now.",
   "actions": [
     { "type": "speed_up", "params": { "clipIndex": 1, "speed": 2 } }
+  ]
+}
+
+User: "Center the subtitles" / "Move captions to center"
+Response:
+{
+  "message": "Centering all your captions now!",
+  "actions": [
+    { "type": "adjust_all_captions", "params": { "y": 500 } }
+  ]
+}
+
+User: "Make subtitles bigger" / "Increase caption size"
+Response:
+{
+  "message": "Making your captions bigger!",
+  "actions": [
+    { "type": "adjust_all_captions", "params": { "fontSize": 64 } }
+  ]
+}
+
+User: "Move subtitles to bottom" / "Put captions at the bottom"
+Response:
+{
+  "message": "Moving all captions to the bottom of the video!",
+  "actions": [
+    { "type": "adjust_all_captions", "params": { "y": 950 } }
+  ]
+}
+
+User: "Make subtitles yellow with black background"
+Response:
+{
+  "message": "Styling your captions with yellow text and black background!",
+  "actions": [
+    { "type": "adjust_all_captions", "params": { "color": "#FFFF00", "backgroundColor": "rgba(0,0,0,0.8)" } }
   ]
 }
 
