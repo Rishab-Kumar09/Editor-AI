@@ -458,10 +458,51 @@ export default function AIChatPanel() {
         <div className="flex-1 overflow-y-auto p-4">
           <CaptionStylePicker
             selectedStyleId={selectedCaptionStyle}
-            onSelectStyle={(styleId) => {
+            onSelectStyle={async (styleId) => {
               setSelectedCaptionStyle(styleId);
-              handleAddCaptions({ clipIndex: 0, styleId });
-              setShowCaptionPicker(false);
+              
+              // If captions already exist, update their style
+              if (textElements.length > 0) {
+                const { captionStyles } = await import('@/app/lib/ai/captionStyles');
+                const style = captionStyles[styleId];
+                
+                if (style) {
+                  // Get Y position from style
+                  const getYPosition = (pos?: string) => {
+                    if (pos === 'top') return 80;
+                    if (pos === 'bottom') return 950;
+                    return 500; // center
+                  };
+                  
+                  await executeTimelineActions(
+                    [{ 
+                      type: 'adjust_all_captions', 
+                      params: {
+                        fontSize: style.fontSize,
+                        y: getYPosition(style.position?.y),
+                        color: style.color,
+                        backgroundColor: style.backgroundColor || undefined,
+                      }
+                    }],
+                    dispatch,
+                    mediaFiles,
+                    textElements
+                  );
+                  
+                  const msg: Message = {
+                    id: Date.now().toString(),
+                    role: 'assistant',
+                    content: `✅ Applied ${style.name} style to all captions!`,
+                    timestamp: new Date()
+                  };
+                  setMessages(prev => [...prev, msg]);
+                }
+                setShowCaptionPicker(false);
+              } else {
+                // No captions yet, generate them with this style
+                handleAddCaptions({ clipIndex: 0, styleId });
+                setShowCaptionPicker(false);
+              }
             }}
             onApplyCustomSettings={async (settings) => {
               // Apply custom settings to all captions using AI action
