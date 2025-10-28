@@ -87,11 +87,11 @@ export default function CaptionStylePicker({
           {/* Y Position */}
           <div>
             <label className="block text-sm text-gray-300 mb-2">
-              Vertical Position: {yPosition === 80 ? 'Top' : yPosition === 500 ? 'Center' : 'Bottom'}
+              Vertical Position: {yPosition <= 150 ? 'Top' : yPosition >= 900 ? 'Bottom' : 'Center'}
             </label>
             <input
               type="range"
-              min="80"
+              min="120"
               max="950"
               step="10"
               value={yPosition}

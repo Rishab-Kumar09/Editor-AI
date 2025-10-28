@@ -469,9 +469,9 @@ export default function AIChatPanel() {
                 if (style) {
                   // Get Y position from style
                   const getYPosition = (pos?: string) => {
-                    if (pos === 'top') return 80;
+                    if (pos === 'top') return 120;
                     if (pos === 'bottom') return 950;
-                    return 500; // center
+                    return 540; // center (half of 1080)
                   };
                   
                   await executeTimelineActions(

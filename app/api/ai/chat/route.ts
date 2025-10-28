@@ -37,10 +37,10 @@ AVAILABLE ACTIONS:
   * Use forceRetranscribe: true ONLY if user explicitly says "transcribe again" or "re-transcribe"
 - adjust_all_captions: 🎨 Adjust ALL caption properties at once! (params: {fontSize?, y?, color?, backgroundColor?})
   * fontSize: number (e.g., 48, 64, 32)
-  * y: number - Position (80=top, 500=center, 950=bottom)
+  * y: number - Position (120=top, 540=center, 950=bottom)
   * color: hex color (e.g., "#FFFFFF", "#FFFF00")
   * backgroundColor: hex with alpha (e.g., "rgba(0,0,0,0.7)")
-  * Examples: "center subtitles" → y:500, "bigger subtitles" → fontSize:64, "move to bottom" → y:950
+  * Examples: "center subtitles" → y:540, "bigger subtitles" → fontSize:64, "move to bottom" → y:950
 - remove_all_captions: 🗑️ Remove ALL captions/subtitles from timeline (params: {})
   * Use when user says: "remove subtitles", "delete captions", "clear all text"
 - search_and_add_images: 🆕 Search and download images from internet! (params: {query, count, positions?})
@@ -157,7 +157,7 @@ Response:
 {
   "message": "Centering all your captions now!",
   "actions": [
-    { "type": "adjust_all_captions", "params": { "y": 500 } }
+    { "type": "adjust_all_captions", "params": { "y": 540 } }
   ]
 }
 
