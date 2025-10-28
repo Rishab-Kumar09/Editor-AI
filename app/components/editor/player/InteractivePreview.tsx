@@ -17,7 +17,7 @@ import { MediaFile } from '@/app/types';
  */
 export default function InteractivePreview() {
   const dispatch = useAppDispatch();
-  const { mediaFiles, activeElement, activeElementIndex, currentTime } = useAppSelector(
+  const { mediaFiles = [], activeElement, activeElementIndex, currentTime } = useAppSelector(
     (state) => state.projectState
   );
   
@@ -25,8 +25,8 @@ export default function InteractivePreview() {
   const [selectedImageRef, setSelectedImageRef] = useState<HTMLDivElement | null>(null);
   const [containerSize, setContainerSize] = useState({ width: 1920, height: 1080 });
 
-  // Get currently selected image at current time
-  const selectedImage = activeElement === 'media' 
+  // Get currently selected image at current time (with safety checks)
+  const selectedImage = activeElement === 'media' && mediaFiles.length > 0
     ? mediaFiles.find((m, i) => 
         i === activeElementIndex && 
         m.type === 'image' && 

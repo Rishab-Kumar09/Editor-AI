@@ -7,7 +7,7 @@ import { setCurrentTime, setMediaFiles } from "@/app/store/slices/projectSlice";
 
 const Composition = () => {
     const projectState = useAppSelector((state) => state.projectState);
-    const { mediaFiles, textElements } = projectState;
+    const { mediaFiles = [], textElements = [] } = projectState;
     const frame = useCurrentFrame();
     const dispatch = useAppDispatch();
 
@@ -28,22 +28,22 @@ const Composition = () => {
     return (
         <>
             {mediaFiles
+                .filter((item: MediaFile) => item && item.id && item.type)
                 .map((item: MediaFile) => {
-                    if (!item) return;
                     const trackItem = {
                         ...item,
                     } as MediaFile;
-                    return SequenceItem[trackItem.type](trackItem, {
+                    return SequenceItem[trackItem.type]?.(trackItem, {
                         fps
                     });
                 })}
             {textElements
+                .filter((item: TextElement) => item && item.id)
                 .map((item: TextElement) => {
-                    if (!item) return;
                     const trackItem = {
                         ...item,
                     } as TextElement;
-                    return SequenceItem["text"](trackItem, {
+                    return SequenceItem["text"]?.(trackItem, {
                         fps
                     });
                 })}
