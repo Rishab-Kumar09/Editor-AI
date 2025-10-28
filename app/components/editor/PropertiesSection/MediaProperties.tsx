@@ -182,6 +182,117 @@ export default function MediaProperties() {
                 </div>
             </div>
 
+            {/* Speed Control */}
+            {(mediaFile.type === "video" || mediaFile.type === "audio") && (
+                <div className="space-y-2 mt-4 bg-purple-900 bg-opacity-20 border border-purple-500 rounded-lg p-4">
+                    <h4 className="font-semibold text-purple-300 flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Speed Control: {mediaFile.playbackSpeed || 1}x
+                    </h4>
+                    <div className="space-y-3">
+                        {/* Quick Buttons */}
+                        <div className="grid grid-cols-4 gap-2">
+                            <button
+                                onClick={() => onUpdateMedia(mediaFile.id, { playbackSpeed: 0.25 })}
+                                className={`px-3 py-2 rounded text-sm transition-colors ${
+                                    mediaFile.playbackSpeed === 0.25 
+                                        ? 'bg-purple-600 text-white' 
+                                        : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                                }`}
+                            >
+                                0.25x
+                            </button>
+                            <button
+                                onClick={() => onUpdateMedia(mediaFile.id, { playbackSpeed: 0.5 })}
+                                className={`px-3 py-2 rounded text-sm transition-colors ${
+                                    mediaFile.playbackSpeed === 0.5 
+                                        ? 'bg-purple-600 text-white' 
+                                        : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                                }`}
+                            >
+                                0.5x
+                            </button>
+                            <button
+                                onClick={() => onUpdateMedia(mediaFile.id, { playbackSpeed: 1 })}
+                                className={`px-3 py-2 rounded text-sm transition-colors ${
+                                    (mediaFile.playbackSpeed || 1) === 1 
+                                        ? 'bg-purple-600 text-white' 
+                                        : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                                }`}
+                            >
+                                1x
+                            </button>
+                            <button
+                                onClick={() => onUpdateMedia(mediaFile.id, { playbackSpeed: 1.5 })}
+                                className={`px-3 py-2 rounded text-sm transition-colors ${
+                                    mediaFile.playbackSpeed === 1.5 
+                                        ? 'bg-purple-600 text-white' 
+                                        : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                                }`}
+                            >
+                                1.5x
+                            </button>
+                            <button
+                                onClick={() => onUpdateMedia(mediaFile.id, { playbackSpeed: 2 })}
+                                className={`px-3 py-2 rounded text-sm transition-colors ${
+                                    mediaFile.playbackSpeed === 2 
+                                        ? 'bg-purple-600 text-white' 
+                                        : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                                }`}
+                            >
+                                2x
+                            </button>
+                            <button
+                                onClick={() => onUpdateMedia(mediaFile.id, { playbackSpeed: 3 })}
+                                className={`px-3 py-2 rounded text-sm transition-colors ${
+                                    mediaFile.playbackSpeed === 3 
+                                        ? 'bg-purple-600 text-white' 
+                                        : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                                }`}
+                            >
+                                3x
+                            </button>
+                            <button
+                                onClick={() => onUpdateMedia(mediaFile.id, { playbackSpeed: 4 })}
+                                className={`px-3 py-2 rounded text-sm transition-colors ${
+                                    mediaFile.playbackSpeed === 4 
+                                        ? 'bg-purple-600 text-white' 
+                                        : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                                }`}
+                            >
+                                4x
+                            </button>
+                            <button
+                                onClick={() => onUpdateMedia(mediaFile.id, { playbackSpeed: 1 })}
+                                className="px-3 py-2 rounded text-sm bg-gray-800 hover:bg-gray-700 text-gray-300 transition-colors"
+                            >
+                                Reset
+                            </button>
+                        </div>
+
+                        {/* Fine-tune slider */}
+                        <div>
+                            <label className="block text-xs mb-1 text-purple-200">Fine-tune (0.1x - 5x)</label>
+                            <input
+                                type="range"
+                                min="0.1"
+                                max="5"
+                                step="0.1"
+                                value={mediaFile.playbackSpeed || 1}
+                                onChange={(e) => onUpdateMedia(mediaFile.id, { playbackSpeed: Number(e.target.value) })}
+                                className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
+                            />
+                        </div>
+
+                        <p className="text-xs text-purple-200">
+                            💡 Tip: Slow-mo (0.25x-0.5x) for drama, Fast (2x-4x) for time-lapse
+                        </p>
+                    </div>
+                </div>
+            )}
+
             {/* Audio Properties */}
             {(mediaFile.type === "video" || mediaFile.type === "audio") && (
                 <div className="space-y-2 mt-4">
