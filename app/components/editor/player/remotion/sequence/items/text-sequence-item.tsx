@@ -23,15 +23,15 @@ const calculateFrames = (
 };
 
 export const TextSequenceItem: React.FC<{ item: TextElement; options: SequenceItemOptions }> = ({ item, options }) => {
-    // Safety check: return null if item is invalid
+    const { handleTextChange, fps, editableTextId } = options;
+    const dispatch = useAppDispatch();
+    const { textElements, resolution } = useAppSelector((state) => state.projectState);
+
+    // Safety check: return null if item is invalid (AFTER hooks!)
     if (!item || !item.id) {
         console.warn('TextSequenceItem: Invalid item', item);
         return null;
     }
-
-    const { handleTextChange, fps, editableTextId } = options;
-    const dispatch = useAppDispatch();
-    const { textElements, resolution } = useAppSelector((state) => state.projectState);
 
     const { from, durationInFrames } = calculateFrames(
         {
