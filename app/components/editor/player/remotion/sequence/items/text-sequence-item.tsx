@@ -90,29 +90,33 @@ export const TextSequenceItem: React.FC<{ item: TextElement; options: SequenceIt
             data-track-item="transition-element"
             style={{
                 position: "absolute",
-                width: item.width || 3000,
-                height: item.height || 400,
+                width: "fit-content",
+                maxWidth: "90%", // Don't let captions stretch too wide
+                height: "auto",
                 fontSize: item.fontSize || "16px",
                 top: item.y,
-                left: item.x,
+                left: "50%",
+                transform: "translateX(-50%)", // Center horizontally
                 color: item.color || "#000000",
                 zIndex: 1000,
-                // backgroundColor: item.backgroundColor || "transparent",
                 opacity: item.opacity! / 100,
                 fontFamily: item.font || "Arial",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
             }}
         >
             <div
                 data-text-id={item.id}
                 style={{
-                    height: "100%",
                     boxShadow: "none",
                     outline: "none",
-                    whiteSpace: "normal",
+                    whiteSpace: "nowrap", // Keep text on one line (or change to "normal" for multi-line)
                     backgroundColor: item.backgroundColor || "transparent",
-                    position: "relative",
-                    width: "100%",
+                    padding: item.backgroundColor ? "8px 16px" : "0", // Add padding if background exists
+                    borderRadius: item.backgroundColor ? "8px" : "0",
                     cursor:"move",
+                    display: "inline-block",
                 }}
                 onMouseDown={handleMouseDown}
                 // onMouseMove={handleMouseMove}
