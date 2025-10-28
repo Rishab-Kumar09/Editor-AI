@@ -216,6 +216,19 @@ export default function AIChatPanel() {
         return;
       }
 
+      // If we have transcript but no style selected, show style picker
+      if (!params.styleId && !selectedCaptionStyle) {
+        const msg: Message = {
+          id: Date.now().toString(),
+          role: 'assistant',
+          content: '🎨 Great! Now choose a caption style above.',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, msg]);
+        setShowCaptionPicker(true);
+        return;
+      }
+
       // Get caption style
       const { captionStyles } = await import('@/app/lib/ai/captionStyles');
       const style = captionStyles[params.styleId || selectedCaptionStyle || 'mrbeast'] || captionStyles.mrbeast;
@@ -230,13 +243,26 @@ export default function AIChatPanel() {
       console.log('📝 Creating captions from', segments.length, 'segments');
 
       // Actually add captions to the timeline!
+      // For 1920x1080 canvas: top=80, center=500, bottom=950
+      const getYPosition = (pos?: string) => {
+        if (pos === 'top') return 80;
+        if (pos === 'bottom') return 950;
+        return 500; // center
+      };
+
+      const getXPosition = (pos?: string) => {
+        if (pos === 'left') return 100;
+        if (pos === 'right') return 1720;
+        return 960; // center
+      };
+
       const captionElements = segments.map((seg: any, index: number) => ({
         id: `caption-${Date.now()}-${index}`,
         text: seg.text,
         positionStart: seg.start,
         positionEnd: seg.end,
-        x: style.position?.x === 'left' ? 10 : style.position?.x === 'right' ? 90 : 50,
-        y: style.position?.y === 'top' ? 10 : style.position?.y === 'bottom' ? 90 : 50,
+        x: getXPosition(style.position?.x),
+        y: getYPosition(style.position?.y),
         fontSize: style.fontSize || 48,
         font: style.fontFamily || 'Arial Black',
         color: style.color || '#FFFFFF',

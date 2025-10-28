@@ -16,10 +16,90 @@ export default function TextProperties() {
         )));
     };
 
+    const onUpdateAllCaptions = (updates: Partial<TextElement>) => {
+        dispatch(setTextElements(textElements.map(text => ({
+            ...text,
+            ...updates
+        }))));
+    };
+
     if (!textElement) return null;
 
     return (
         <div className="space-y-4">
+            {/* Bulk Caption Editor */}
+            {textElements.length > 1 && (
+                <div className="bg-blue-900 bg-opacity-20 border border-blue-500 rounded-lg p-4 space-y-3">
+                    <h4 className="font-semibold text-blue-300 flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                        Bulk Edit All {textElements.length} Captions
+                    </h4>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label className="block text-xs mb-1">Font Size</label>
+                            <input
+                                type="number"
+                                step="2"
+                                placeholder={textElement.fontSize?.toString() || "48"}
+                                onChange={(e) => {
+                                    const val = Number(e.target.value);
+                                    if (val > 0) onUpdateAllCaptions({ fontSize: val });
+                                }}
+                                className="w-full p-2 bg-gray-800 border border-gray-600 text-white text-sm rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs mb-1">Y Position</label>
+                            <input
+                                type="number"
+                                step="10"
+                                placeholder={textElement.y?.toString() || "950"}
+                                onChange={(e) => {
+                                    const val = Number(e.target.value);
+                                    onUpdateAllCaptions({ y: val });
+                                }}
+                                className="w-full p-2 bg-gray-800 border border-gray-600 text-white text-sm rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs mb-1">Text Color</label>
+                            <input
+                                type="color"
+                                defaultValue={textElement.color || "#FFFFFF"}
+                                onChange={(e) => onUpdateAllCaptions({ color: e.target.value })}
+                                className="w-full h-9 bg-gray-800 border border-gray-600 rounded cursor-pointer"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs mb-1">Background</label>
+                            <input
+                                type="color"
+                                defaultValue={textElement.backgroundColor || "#000000"}
+                                onChange={(e) => onUpdateAllCaptions({ backgroundColor: e.target.value })}
+                                className="w-full h-9 bg-gray-800 border border-gray-600 rounded cursor-pointer"
+                            />
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => {
+                            if (confirm('Reset all captions to default style?')) {
+                                onUpdateAllCaptions({
+                                    fontSize: 48,
+                                    y: 950,
+                                    color: '#FFFFFF',
+                                    backgroundColor: 'rgba(0,0,0,0.7)'
+                                });
+                            }
+                        }}
+                        className="w-full px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded transition-colors"
+                    >
+                        Reset All to Defaults
+                    </button>
+                </div>
+            )}
+
             <div className="grid grid-cols-2 gap-8">
                 {/* Text Content */}
                 <div className="space-y-2">
