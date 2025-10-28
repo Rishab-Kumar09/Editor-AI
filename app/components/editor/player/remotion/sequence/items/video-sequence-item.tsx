@@ -27,6 +27,12 @@ interface VideoSequenceItemProps {
 }
 
 export const VideoSequenceItem: React.FC<VideoSequenceItemProps> = ({ item, options }) => {
+    // Safety check: return null if item is invalid
+    if (!item || !item.id) {
+        console.warn('VideoSequenceItem: Invalid item', item);
+        return null;
+    }
+
     const { fps } = options;
 
     const playbackRate = item.playbackSpeed || 1;

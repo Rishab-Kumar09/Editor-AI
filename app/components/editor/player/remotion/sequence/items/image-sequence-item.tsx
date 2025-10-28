@@ -27,6 +27,12 @@ interface ImageSequenceItemProps {
 }
 
 export const ImageSequenceItem: React.FC<ImageSequenceItemProps> = ({ item, options }) => {
+    // Safety check: return null if item is invalid
+    if (!item || !item.id) {
+        console.warn('ImageSequenceItem: Invalid item', item);
+        return null;
+    }
+
     const { fps } = options;
 
     const { from, durationInFrames } = calculateFrames(

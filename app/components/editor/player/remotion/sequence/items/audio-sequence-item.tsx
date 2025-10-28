@@ -23,6 +23,12 @@ const calculateFrames = (
 };
 
 export const AudioSequenceItem: React.FC<{ item: MediaFile; options: SequenceItemOptions }> = ({ item, options }) => {
+        // Safety check: return null if item is invalid
+        if (!item || !item.id) {
+            console.warn('AudioSequenceItem: Invalid item', item);
+            return null;
+        }
+
         const { fps } = options;
         const playbackRate = item.playbackSpeed || 1;
         const { from, durationInFrames } = calculateFrames(
