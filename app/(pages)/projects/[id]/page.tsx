@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { getFile, storeProject, useAppDispatch, useAppSelector } from "../../../store";
 import { getProject } from "../../../store";
 import { setCurrentProject, updateProject } from "../../../store/slices/projectsSlice";
-import { rehydrate, setMediaFiles } from '../../../store/slices/projectSlice';
+import { rehydrate, setMediaFiles, setTextElements } from '../../../store/slices/projectSlice';
 import { setActiveSection } from "../../../store/slices/projectSlice";
 import AddText from '../../../components/editor/AssetsPanel/tools-section/AddText';
 import AddMedia from '../../../components/editor/AssetsPanel/AddButtons/UploadMedia';
@@ -105,6 +105,30 @@ export default function Project({ params }: { params: { id: string } }) {
         saveProject();
     }, [projectState, dispatch]);
 
+    // Delete key handler
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // Only handle Delete key when not typing in input/textarea
+            if (e.key === 'Delete' && !(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
+                const { activeElement, activeElementIndex, mediaFiles, textElements } = projectState;
+                
+                if (activeElement === 'media' && mediaFiles[activeElementIndex]) {
+                    const element = mediaFiles[activeElementIndex];
+                    if (confirm(`Delete ${element.fileName}?`)) {
+                        dispatch(setMediaFiles(mediaFiles.filter(m => m.id !== element.id)));
+                    }
+                } else if (activeElement === 'text' && textElements[activeElementIndex]) {
+                    const element = textElements[activeElementIndex];
+                    if (confirm(`Delete text element?`)) {
+                        dispatch(setTextElements(textElements.filter(t => t.id !== element.id)));
+                    }
+                }
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [projectState, dispatch]);
 
     const handleFocus = (section: "media" | "text" | "export" | "ai") => {
         dispatch(setActiveSection(section));

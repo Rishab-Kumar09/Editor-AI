@@ -132,7 +132,17 @@ export default function MediaProperties() {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm">Zindex</label>
+                            <label className="block text-sm">Rotation (°)</label>
+                            <input
+                                type="number"
+                                step="1"
+                                value={mediaFile.rotation || 0}
+                                onChange={(e) => onUpdateMedia(mediaFile.id, { rotation: Number(e.target.value) })}
+                                className="w-full p-2 bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:ring-2 focus:ring-white-500 focus:border-white-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm">Z-Index (Layer)</label>
                             <input
                                 type="number"
                                 value={mediaFile.zIndex || 0}
@@ -140,25 +150,45 @@ export default function MediaProperties() {
                                 className="w-full p-2 bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:ring-2 focus:ring-white-500 focus:border-white-500"
                             />
                         </div>
-                        <div>
-                            <label className="block text-sm">Opacity</label>
-                            <input
-                                type="range"
-                                min="0"
-                                max="100"
-                                value={mediaFile.opacity}
-                                onChange={(e) => onUpdateMedia(mediaFile.id, { opacity: Number(e.target.value) })}
-                                className="w-full bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:border-white-500"
-                            />
-                        </div>
+                    </div>
+                    <div className="mt-4">
+                        <label className="block text-sm mb-2">Opacity: {mediaFile.opacity || 100}%</label>
+                        <input
+                            type="range"
+                            min="0"
+                            max="100"
+                            value={mediaFile.opacity || 100}
+                            onChange={(e) => onUpdateMedia(mediaFile.id, { opacity: Number(e.target.value) })}
+                            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                        />
                     </div>
                 </div>
-                {/* Audio Properties */}
-                {(mediaFile.type === "video" || mediaFile.type === "audio") && <div className="space-y-2">
+                {/* Delete Button */}
+                <div className="space-y-2">
+                    <button
+                        onClick={() => {
+                            if (confirm(`Delete ${mediaFile.fileName}?`)) {
+                                dispatch(setMediaFiles(mediaFiles.filter(m => m.id !== mediaFile.id)));
+                            }
+                        }}
+                        className="w-full px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Delete Element
+                    </button>
+                    <p className="text-xs text-gray-400 text-center">Or press Delete key</p>
+                </div>
+            </div>
+
+            {/* Audio Properties */}
+            {(mediaFile.type === "video" || mediaFile.type === "audio") && (
+                <div className="space-y-2 mt-4">
                     <h4 className="font-semibold">Audio Properties</h4>
                     <div className="grid grid-cols-1 gap-4">
                         <div>
-                            <label className="block text-sm mb-2 text-white">Volume</label>
+                            <label className="block text-sm mb-2 text-white">Volume: {mediaFile.volume}%</label>
                             <input
                                 type="range"
                                 min="0"
@@ -166,27 +196,12 @@ export default function MediaProperties() {
                                 step="1"
                                 value={mediaFile.volume}
                                 onChange={(e) => onUpdateMedia(mediaFile.id, { volume: Number(e.target.value) })}
-                                className="w-full bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:border-white-500"
+                                className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
                             />
                         </div>
-                        {/* TODO: Add playback speed */}
-                        {/* <div>
-                            <label className="block text-sm">Speed</label>
-                            <input
-                                type="number"
-                                min="0.1"
-                                max="4"
-                                step="0.1"
-                                value={mediaFile.playbackSpeed || 1}
-                                onChange={(e) => onUpdateMedia(mediaFile.id, { playbackSpeed: Number(e.target.value) })}
-                                className="w-full p-2 bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:ring-2 focus:ring-white-500 focus:border-white-500"
-                            />
-                        </div> */}
                     </div>
-                </div>}
-                <div >
                 </div>
-            </div>
-        </div >
+            )}
+        </div>
     );
 }
