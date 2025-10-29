@@ -18,7 +18,7 @@ export default function CaptionStylePicker({
   onSelectStyle,
   onApplyCustomSettings,
 }: CaptionStylePickerProps) {
-  const [yPosition, setYPosition] = useState(950); // Default bottom position
+  const [yPosition, setYPosition] = useState(1000); // Default bottom position
   const [bgColor, setBgColor] = useState('#000000');
   const [bgOpacity, setBgOpacity] = useState(70);
   const [fontSize, setFontSize] = useState(48);
@@ -87,19 +87,18 @@ export default function CaptionStylePicker({
           {/* Y Position */}
           <div>
             <label className="block text-sm text-gray-300 mb-2">
-              Vertical Position: {yPosition <= 150 ? 'Top' : yPosition >= 900 ? 'Bottom' : 'Center'}
+              Vertical Position: {yPosition >= 900 ? 'Bottom' : 'Center'}
             </label>
             <input
               type="range"
-              min="120"
-              max="950"
+              min="10"
+              max="1000"
               step="10"
               value={yPosition}
               onChange={(e) => setYPosition(Number(e.target.value))}
               className="w-full accent-blue-600"
             />
             <div className="flex justify-between text-xs text-gray-500 mt-1">
-              <span>Top</span>
               <span>Center</span>
               <span>Bottom</span>
             </div>

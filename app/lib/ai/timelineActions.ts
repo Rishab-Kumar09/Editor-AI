@@ -83,6 +83,14 @@ export async function executeTimelineActions(
           console.log('AI provided manual instructions:', action.params);
           break;
 
+        case 'apply_editing_style':
+          console.log('⚠️ Edit style feature coming soon!');
+          break;
+
+        case 'list_available_styles':
+          console.log('⚠️ Style list feature coming soon!');
+          break;
+
         default:
           console.warn('Unknown action type:', action.type);
       }
@@ -475,4 +483,7 @@ async function handleRemoveAllCaptions(dispatch: Dispatch) {
   dispatch(setTextElements([]));
   console.log('✅ All captions removed!');
 }
+
+// Editing style features temporarily disabled to fix build issues
+// Will be re-enabled once proper server-side architecture is implemented
 

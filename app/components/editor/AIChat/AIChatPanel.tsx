@@ -243,11 +243,11 @@ export default function AIChatPanel() {
       console.log('📝 Creating captions from', segments.length, 'segments');
 
       // Actually add captions to the timeline!
-      // For 1920x1080 canvas: top=80, center=500, bottom=950
+      // For 1920x1080 canvas: top=10, center=540, bottom=1000
       const getYPosition = (pos?: string) => {
-        if (pos === 'top') return 80;
-        if (pos === 'bottom') return 950;
-        return 500; // center
+        if (pos === 'top') return 10; // TRULY top!
+        if (pos === 'bottom') return 1000;
+        return 540; // true center
       };
 
       const getXPosition = (pos?: string) => {
