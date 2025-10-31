@@ -11,16 +11,19 @@ export default function TextProperties() {
     const dispatch = useAppDispatch();
 
     const onUpdateText = (id: string, updates: Partial<TextElement>) => {
-        dispatch(setTextElements(textElements.map(text =>
-            text.id === id ? { ...text, ...updates } : text
-        )));
+        dispatch(setTextElements(
+            textElements
+                .filter((t): t is TextElement => t != null && typeof t === 'object' && 'id' in t) // Safety filter
+                .map(text => text.id === id ? { ...text, ...updates } : text)
+        ));
     };
 
     const onUpdateAllCaptions = (updates: Partial<TextElement>) => {
-        dispatch(setTextElements(textElements.map(text => ({
-            ...text,
-            ...updates
-        }))));
+        dispatch(setTextElements(
+            textElements
+                .filter((t): t is TextElement => t != null && typeof t === 'object' && 'id' in t) // Safety filter
+                .map(text => ({ ...text, ...updates }))
+        ));
     };
 
     if (!textElement) return null;

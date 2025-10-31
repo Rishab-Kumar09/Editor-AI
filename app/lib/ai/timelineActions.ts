@@ -91,6 +91,14 @@ export async function executeTimelineActions(
           console.log('⚠️ Style list feature coming soon!');
           break;
 
+        case 'remove_images':
+          await handleRemoveImages(dispatch, currentMediaFiles, action.params);
+          break;
+
+        case 'adjust_all_images':
+          await handleAdjustAllImages(dispatch, currentMediaFiles, action.params);
+          break;
+
         default:
           console.warn('Unknown action type:', action.type);
       }
@@ -336,11 +344,16 @@ async function handleAddCaptions(
 async function handleSearchAndAddImages(
   dispatch: Dispatch,
   currentMediaFiles: MediaFile[],
-  params: { query: string; count?: number; positions?: number[] }
+  params: { 
+    query: string; 
+    count?: number; 
+    positions?: number[];
+    keywords?: Array<{ keyword: string; timestamp: number }>; // For synced placement with transcript
+  }
 ) {
-  const { query, count = 5, positions } = params;
+  const { query, count = 5, positions, keywords } = params;
   
-  console.log(`🔍 Searching for ${count} images: "${query}"`);
+  console.log(`🔍 Searching for ${count} images: "${query}"${keywords ? ' (⏱️ synced with transcript)' : ''}`);
 
   try {
     // Call image search API
@@ -398,10 +411,32 @@ async function handleSearchAndAddImages(
         // Create blob URL for immediate display (critical for video player!)
         const blobUrl = URL.createObjectURL(blob);
 
-        // Calculate position: distribute evenly within video duration
-        const position = positions && positions[i] !== undefined 
-          ? positions[i] 
-          : Math.min(i * spacing, videoDuration - imageDuration);
+        // Calculate position: use keyword timestamp if available, otherwise distribute evenly
+        const position = keywords && keywords[i] 
+          ? keywords[i].timestamp // Use exact timestamp from transcript
+          : positions && positions[i] !== undefined 
+            ? positions[i] 
+            : Math.min(i * spacing, videoDuration - imageDuration);
+        
+        const imageKeyword = keywords && keywords[i] ? keywords[i].keyword : query;
+
+        // Position images in a grid pattern (2 columns)
+        const imageWidth = 600; // Reasonable size for overlay
+        const imageHeight = 400;
+        const padding = 50;
+        
+        // Calculate grid position (2 columns, multiple rows)
+        const col = i % 2; // 0 or 1 (left or right column)
+        const row = Math.floor(i / 2); // Which row
+        
+        const xPos = col === 0 
+          ? padding // Left side
+          : 1920 - imageWidth - padding; // Right side
+        
+        const yPos = padding + (row * (imageHeight + padding)); // Stack vertically with spacing
+        
+        // Ensure image stays within canvas bounds
+        const finalY = Math.min(yPos, 1080 - imageHeight - padding);
 
         const mediaFile: MediaFile = {
           id: `media-${Date.now()}-${i}`,
@@ -417,17 +452,17 @@ async function handleSearchAndAddImages(
           playbackSpeed: 1,
           volume: 1,
           zIndex: 10 + i, // Higher zIndex so images appear on top of video
-          // Position and size for proper display
-          x: 0, // Center horizontally
-          y: 0, // Center vertically  
-          width: 1920, // Full HD width (will scale down)
-          height: 1080, // Full HD height (will scale down)
+          // Position in grid layout
+          x: xPos,
+          y: finalY,  
+          width: imageWidth,
+          height: imageHeight,
           opacity: 100, // Fully visible
         };
 
         newMediaFiles.push(mediaFile);
 
-        console.log(`📥 Downloaded: ${image.alt} at ${Math.max(0, position).toFixed(1)}s (${image.source})`);
+        console.log(`📥 Downloaded: ${image.alt} at ${Math.max(0, position).toFixed(1)}s${imageKeyword !== query ? ` [keyword: "${imageKeyword}"]` : ''} (${image.source})`);
       } catch (error) {
         console.error(`Failed to download image ${i + 1}:`, error);
       }
@@ -482,6 +517,99 @@ async function handleRemoveAllCaptions(dispatch: Dispatch) {
   console.log('🗑️ Removing all captions/subtitles from timeline');
   dispatch(setTextElements([]));
   console.log('✅ All captions removed!');
+}
+
+/**
+ * Remove images from timeline
+ * Params: {all?: boolean, index?: number}
+ */
+async function handleRemoveImages(
+  dispatch: Dispatch,
+  currentMediaFiles: MediaFile[],
+  params: { all?: boolean; index?: number }
+) {
+  const { all, index } = params;
+
+  if (all) {
+    // Remove ALL images
+    console.log('🗑️ Removing all images from timeline');
+    // CRITICAL: Filter out undefined/null entries AND non-image files
+    const updatedMedia = currentMediaFiles.filter(file => 
+      file != null && typeof file === 'object' && 'type' in file && file.type !== 'image'
+    );
+    dispatch(setMediaFiles(updatedMedia));
+    console.log(`✅ Removed all images! (${currentMediaFiles.length - updatedMedia.length} images removed)`);
+  } else if (index !== undefined) {
+    // Remove specific image by index
+    console.log(`🗑️ Removing image at index ${index}`);
+    // CRITICAL: Filter out undefined/null entries first
+    const images = currentMediaFiles.filter(file => 
+      file != null && typeof file === 'object' && 'type' in file && file.type === 'image'
+    );
+    
+    if (index >= 0 && index < images.length) {
+      const imageToRemove = images[index];
+      const updatedMedia = currentMediaFiles.filter(file => 
+        file != null && typeof file === 'object' && 'id' in file && file.id !== imageToRemove.id
+      );
+      dispatch(setMediaFiles(updatedMedia));
+      console.log(`✅ Removed image: ${imageToRemove.fileName}`);
+    } else {
+      console.error(`❌ Invalid image index: ${index} (total images: ${images.length})`);
+    }
+  } else {
+    console.warn('⚠️ No removal parameters specified (all or index)');
+  }
+}
+
+/**
+ * Adjust all image properties at once
+ * Params: {x?, y?, width?, height?, opacity?}
+ */
+async function handleAdjustAllImages(
+  dispatch: Dispatch,
+  currentMediaFiles: MediaFile[],
+  params: {
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
+    opacity?: number;
+  }
+) {
+  const { x, y, width, height, opacity } = params;
+  
+  console.log(`🖼️ Adjusting all images:`, params);
+
+  // Find all image files - with safety check for undefined entries
+  const images = currentMediaFiles.filter(file => 
+    file != null && typeof file === 'object' && 'type' in file && file.type === 'image'
+  );
+  
+  if (images.length === 0) {
+    console.warn('⚠️ No images found on timeline');
+    return;
+  }
+
+  // Update all images with new properties - filter out any undefined entries
+  const updatedMediaFiles = currentMediaFiles
+    .filter(file => file != null && typeof file === 'object' && 'type' in file)
+    .map((file) => {
+      if (file.type === 'image') {
+        return {
+          ...file,
+          ...(x !== undefined && { x }),
+          ...(y !== undefined && { y }),
+          ...(width !== undefined && { width }),
+          ...(height !== undefined && { height }),
+          ...(opacity !== undefined && { opacity }),
+        };
+      }
+      return file;
+    });
+
+  dispatch(setMediaFiles(updatedMediaFiles));
+  console.log(`✅ Updated ${images.length} images!`);
 }
 
 // Editing style features temporarily disabled to fix build issues

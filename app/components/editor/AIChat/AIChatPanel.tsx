@@ -7,6 +7,7 @@ import { setTranscript as saveTranscript } from '@/app/store/slices/projectSlice
 import { executeTimelineActions } from '@/app/lib/ai/timelineActions';
 import TranscriptPanel from '@/app/components/editor/Transcript/TranscriptPanel';
 import CaptionStylePicker from '@/app/components/editor/Transcript/CaptionStylePicker';
+import ImageSettingsPicker from '@/app/components/editor/Transcript/ImageSettingsPicker';
 import { getFile } from '@/app/store';
 
 interface Message {
@@ -33,6 +34,7 @@ export default function AIChatPanel() {
   const [apiKeyStatus, setApiKeyStatus] = useState<'checking' | 'valid' | 'missing'>('checking');
   const [showTranscript, setShowTranscript] = useState(false);
   const [showCaptionPicker, setShowCaptionPicker] = useState(false);
+  const [showImageSettings, setShowImageSettings] = useState(false);
   const [selectedCaptionStyle, setSelectedCaptionStyle] = useState('mrbeast');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -315,15 +317,39 @@ export default function AIChatPanel() {
     setIsLoading(true);
 
     try {
+      // Prepare messages with transcript context embedded in first user message if needed
+      let contextMessages = [...messages, userMessage].map(m => ({
+        role: m.role,
+        content: m.content
+      }));
+
+      // If this is the first message and we have a transcript, embed it with segment timing
+      if (transcript && messages.length === 0) {
+        const lastMessage = contextMessages[contextMessages.length - 1];
+        if (lastMessage.role === 'user') {
+          // Include full transcript text AND segment timing information
+          let transcriptContext = `[VIDEO TRANSCRIPT: "${transcript.text}"]\n\n`;
+          
+          // Add segment timing if available (for precise image placement)
+          if (transcript.segments && transcript.segments.length > 0) {
+            transcriptContext += `[TRANSCRIPT SEGMENTS WITH TIMING]:\n`;
+            transcript.segments.forEach((seg, idx) => {
+              transcriptContext += `[${seg.start.toFixed(1)}s-${seg.end.toFixed(1)}s]: "${seg.text}"\n`;
+            });
+            transcriptContext += '\n';
+          }
+          
+          lastMessage.content = `${transcriptContext}User request: ${lastMessage.content}`;
+        }
+      }
+
       // Call AI Chat API
       const response = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: [...messages, userMessage].map(m => ({
-            role: m.role,
-            content: m.content
-          }))
+          messages: contextMessages,
+          transcript: transcript?.text || null // Also send transcript separately for backend use
         })
       });
 
@@ -424,6 +450,7 @@ export default function AIChatPanel() {
               onClick={() => {
                 setShowTranscript(!showTranscript);
                 setShowCaptionPicker(false);
+                setShowImageSettings(false);
               }}
               className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition"
             >
@@ -435,10 +462,23 @@ export default function AIChatPanel() {
               onClick={() => {
                 setShowCaptionPicker(!showCaptionPicker);
                 setShowTranscript(false);
+                setShowImageSettings(false);
               }}
               className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-lg transition font-semibold"
             >
               🎨 Caption Style
+            </button>
+          )}
+          {mediaFiles.some(file => file.type === 'image') && (
+            <button
+              onClick={() => {
+                setShowImageSettings(!showImageSettings);
+                setShowTranscript(false);
+                setShowCaptionPicker(false);
+              }}
+              className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition font-semibold"
+            >
+              🖼️ Image Settings
             </button>
           )}
         </div>
@@ -451,6 +491,27 @@ export default function AIChatPanel() {
             transcript={transcript}
             onEdit={(newText) => {
               dispatch(saveTranscript({ ...transcript, text: newText }));
+            }}
+          />
+        </div>
+      ) : showImageSettings ? (
+        <div className="flex-1 overflow-y-auto p-4">
+          <ImageSettingsPicker
+            onApplySettings={async (settings) => {
+              // Apply settings to all images using AI action
+              await executeTimelineActions(
+                [{ type: 'adjust_all_images', params: settings }],
+                dispatch,
+                mediaFiles,
+                textElements
+              );
+              const msg: Message = {
+                id: Date.now().toString(),
+                role: 'assistant',
+                content: `✅ Applied image settings to ${mediaFiles.filter(f => f.type === 'image').length} images!`,
+                timestamp: new Date()
+              };
+              setMessages(prev => [...prev, msg]);
             }}
           />
         </div>

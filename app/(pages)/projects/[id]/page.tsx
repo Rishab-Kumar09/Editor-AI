@@ -67,8 +67,13 @@ export default function Project({ params }: { params: { id: string } }) {
                         dispatch(rehydrate(project));
 
                         // Load media files with error handling
+                        // Filter out any undefined/null entries first (safety check)
+                        const validMediaFiles = (project.mediaFiles || []).filter((media: any): media is MediaFile => 
+                            media != null && typeof media === 'object' && 'id' in media
+                        );
+                        
                         const mediaFilesWithSrc = await Promise.all(
-                            (project.mediaFiles || []).map(async (media: MediaFile) => {
+                            validMediaFiles.map(async (media: MediaFile) => {
                                 try {
                                     const file = await getFile(media.fileId);
                                     if (file) {

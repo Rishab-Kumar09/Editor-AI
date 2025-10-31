@@ -57,7 +57,9 @@ export default function InteractivePreview() {
 
   const handleImageUpdate = (id: string, updates: Partial<MediaFile>) => {
     dispatch(setMediaFiles(
-      mediaFiles.map((m) => (m.id === id ? { ...m, ...updates } : m))
+      mediaFiles
+        .filter((m): m is MediaFile => m != null && typeof m === 'object' && 'id' in m) // Safety filter
+        .map((m) => (m.id === id ? { ...m, ...updates } : m))
     ));
   };
 

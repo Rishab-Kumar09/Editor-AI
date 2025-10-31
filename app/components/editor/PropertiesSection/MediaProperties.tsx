@@ -10,9 +10,11 @@ export default function MediaProperties() {
     const mediaFile = mediaFiles[activeElementIndex];
     const dispatch = useAppDispatch();
     const onUpdateMedia = (id: string, updates: Partial<MediaFile>) => {
-        dispatch(setMediaFiles(mediaFiles.map(media =>
-            media.id === id ? { ...media, ...updates } : media
-        )));
+        dispatch(setMediaFiles(
+            mediaFiles
+                .filter((m): m is MediaFile => m != null && typeof m === 'object' && 'id' in m) // Safety filter
+                .map(media => media.id === id ? { ...media, ...updates } : media)
+        ));
     };
 
     if (!mediaFile) return null;
